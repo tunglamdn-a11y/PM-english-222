@@ -1,0 +1,1426 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PM English</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}[hidden]{display:none!important}
+/* Layout: one narrow column like a site diary; phase chips mirror PMBOK process groups; a Gantt bar shows progress */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#16212b; --muted:#5b6a78; --line:#d8dee5;
+  --accent:#1f5f8b; --accent-ink:#ffffff; --bar:#e8a33d; --good:#2e7d4f; --bad:#b4442f; --soft:#e6eef5;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161d; --surface:#17212b; --ink:#e7edf2; --muted:#93a3b2; --line:#2a3743;
+  --accent:#6bb0e0; --accent-ink:#0b1219; --bar:#e8a33d; --good:#5cc08a; --bad:#ec7a62; --soft:#1d2b38; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161d; --surface:#17212b; --ink:#e7edf2; --muted:#93a3b2; --line:#2a3743;
+  --accent:#6bb0e0; --accent-ink:#0b1219; --bar:#e8a33d; --good:#5cc08a; --bad:#ec7a62; --soft:#1d2b38; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,7vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+header .author{margin-top:8px;font:500 12px var(--mono);letter-spacing:.08em;color:var(--ink)}
+.gantt{display:grid;gap:6px;margin-top:14px}
+.gantt-row{display:grid;grid-template-columns:96px 1fr 60px;align-items:center;gap:10px;font-size:12px}
+.gantt-row span:first-child{font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.track{height:10px;background:var(--soft);border-radius:2px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--bar);width:0;transition:width .4s}
+.gantt-row b{font-family:var(--mono);font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+nav{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav button{font:600 14px var(--body);color:var(--muted);background:none;border:0;padding:12px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--body);padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px;min-height:250px;display:flex;flex-direction:column;gap:10px;cursor:pointer;user-select:none}
+.phase{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.term{font-family:var(--display);font-weight:700;font-size:clamp(26px,6.5vw,34px);line-height:1.1;margin:0}
+.ipa{font-family:var(--mono);color:var(--muted);font-size:14px}
+.vn{font-size:19px;font-weight:600}
+.ex{color:var(--muted);border-left:3px solid var(--bar);padding-left:10px;margin:0}
+.ex em{color:var(--ink);font-style:normal;font-weight:600}
+.hint{margin-top:auto;font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:600 14px var(--body);padding:11px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;flex:1;min-width:0}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.good{border-color:var(--good);color:var(--good)}
+.btn.bad{border-color:var(--bad);color:var(--bad)}
+.icon-btn{flex:0 0 auto;width:44px;padding:11px 0;text-align:center}
+.meta{font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;font:500 15px var(--body);padding:13px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--surface))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.q{font-size:18px;font-weight:600;margin:0}
+.q .blank{display:inline-block;min-width:80px;border-bottom:2px solid var(--bar)}
+.score{font-family:var(--display);font-size:48px;font-weight:700;margin:0}
+.grp h3{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:8px 0 6px}
+.ph{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.ph p{margin:0;min-width:0}
+.ph .en{font-weight:600}
+.ph .vi{color:var(--muted);font-size:14px;grid-column:1}
+.ph button{grid-row:1/3;grid-column:2;align-self:center}
+input[type=search]{width:100%;font:15px var(--body);padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.gl{display:grid;gap:0}
+.gl div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.gl b{font-weight:600}
+.gl small{display:block;font-family:var(--mono);color:var(--muted)}
+.empty{color:var(--muted);padding:20px 0}
+.form{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.form h2,.sec h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0}
+.form label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+.form input,.form select,.form textarea,.sec textarea{font:15px var(--body);padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.form .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.sec{display:grid;gap:10px}
+.mine-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.mine-item p{margin:0;min-width:0;overflow-wrap:anywhere}
+.mine-item small{display:block;color:var(--muted)}
+.tag{font:500 10px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--bar);margin-left:6px;white-space:nowrap}
+.note{font-size:13px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>PM English</h1>
+    <p>1.040 thuật ngữ và 118 mẫu câu tiếng Anh quản lý dự án xây dựng, chọn lọc theo tần suất xuất hiện trong sách <i>Construction Project Management</i> (Sears, Sears &amp; Clough, 2008). Câu ví dụ được viết riêng cho app.</p>
+    <p class="author">Author: LE TUNG LAM</p>
+    <div class="gantt" id="gantt" aria-label="Tiến độ đã nhớ theo nhóm"></div>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" data-tab="cards" aria-selected="true">Thẻ từ</button>
+    <button role="tab" data-tab="quiz" aria-selected="false">Trắc nghiệm</button>
+    <button role="tab" data-tab="phrases" aria-selected="false">Mẫu câu họp</button>
+    <button role="tab" data-tab="gloss" aria-selected="false">Tra cứu</button>
+    <button role="tab" data-tab="add" aria-selected="false">+ Thêm</button>
+  </nav>
+
+  <section id="cards" class="pane" style="display:grid;gap:12px">
+    <div class="chips" id="phaseChips"></div>
+    <div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ"></div>
+    <div class="row">
+      <button class="btn bad" id="again">Chưa nhớ</button>
+      <button class="btn icon-btn" id="speak" aria-label="Nghe phát âm">🔊</button>
+      <button class="btn good" id="known">Đã nhớ</button>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span class="meta" id="cardMeta"></span>
+      <button class="chip" id="reset">Đặt lại tiến độ</button>
+    </div>
+  </section>
+
+  <section id="quiz" class="pane" hidden style="display:grid;gap:12px"></section>
+  <section id="phrases" class="pane" hidden></section>
+  <section id="gloss" class="pane" hidden style="display:grid;gap:10px">
+    <input type="search" id="q" placeholder="Tìm tiếng Anh hoặc tiếng Việt…" aria-label="Tìm từ">
+    <div class="gl" id="glList"></div>
+  </section>
+
+  <section id="add" class="pane" hidden style="display:grid;gap:18px">
+    <form id="fWord" class="form" autocomplete="off">
+      <h2>Thêm từ</h2>
+      <div class="two">
+        <label>Thuật ngữ tiếng Anh *<input id="wEn" placeholder="punch list"></label>
+        <label>Nghĩa tiếng Việt *<input id="wVi" placeholder="danh sách tồn tại"></label>
+      </div>
+      <div class="two">
+        <label>Phiên âm (không bắt buộc)<input id="wIpa" placeholder="/pʌntʃ lɪst/"></label>
+        <label>Nhóm quy trình<select id="wPh"></select></label>
+      </div>
+      <label>Câu ví dụ (không bắt buộc)<textarea id="wEx" rows="2" placeholder="There are 42 items left on the punch list."></textarea></label>
+      <p class="note">Nếu câu ví dụ có chứa thuật ngữ, từ đó sẽ được dùng cho dạng bài điền chỗ trống.</p>
+      <button class="btn primary" type="submit">Lưu từ</button>
+    </form>
+
+    <form id="fPhr" class="form" autocomplete="off">
+      <h2>Thêm mẫu câu</h2>
+      <label>Câu tiếng Anh *<textarea id="pEn" rows="2" placeholder="Can we push the deadline to next week?"></textarea></label>
+      <label>Nghĩa tiếng Việt<textarea id="pVi" rows="2" placeholder="Mình lùi hạn sang tuần sau được không?"></textarea></label>
+      <label>Tình huống<select id="pG"></select></label>
+      <button class="btn primary" type="submit">Lưu câu</button>
+    </form>
+
+    <div class="sec">
+      <h2 id="mineTitle">Đã thêm</h2>
+      <div id="mine"></div>
+    </div>
+
+    <div class="sec">
+      <h2>Chuyển sang máy khác</h2>
+      <p class="note">Dữ liệu bạn thêm chỉ lưu trên trình duyệt này. Bấm Sao chép, mở app trên máy kia, dán vào ô dưới rồi bấm Nhập.</p>
+      <textarea id="dataBox" rows="3" placeholder="Dán dữ liệu đã sao chép vào đây"></textarea>
+      <div class="row">
+        <button class="btn" type="button" id="copyData">Sao chép dữ liệu</button>
+        <button class="btn" type="button" id="importData">Nhập</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const PHASES={"GC": "Contracts · Ngành & hợp đồng", "MS": "Management · Hệ thống quản lý", "ES": "Estimating · Dự toán", "PS": "Scheduling · Kế hoạch & tiến độ", "SP": "Site · Thi công & công trường", "RA": "Resources · Tăng tốc & nguồn lực", "TC": "Control · Kiểm soát tiến độ", "CF": "Finance · Chi phí & tài chính", "GW": "General · Từ thông dụng"};
+const LEGACY={I:"GC",P:"PS",E:"SP",M:"TC",C:"CF"};
+const V=[
+["GC", "project charter", "/ˈprɒdʒekt ˈtʃɑːtə/", "điều lệ dự án", "The sponsor signed the <em>project charter</em> and named me as project manager."],
+["GC", "stakeholder", "/ˈsteɪkhəʊldə/", "bên liên quan", "We need to identify every <em>stakeholder</em> before design starts, including the residents nearby."],
+["GC", "sponsor", "/ˈspɒnsə/", "nhà tài trợ / người bảo trợ dự án", "The <em>sponsor</em> approves any budget increase above 5%."],
+["GC", "business case", "/ˈbɪznəs keɪs/", "luận chứng đầu tư", "The <em>business case</em> shows a payback period of seven years."],
+["GC", "feasibility study", "/ˌfiːzəˈbɪləti ˈstʌdi/", "nghiên cứu khả thi", "The <em>feasibility study</em> recommends Option B for the bridge."],
+["GC", "scope", "/skəʊp/", "phạm vi", "Landscaping is outside the <em>scope</em> of this contract."],
+["PS", "work breakdown structure", "/wɜːk ˈbreɪkdaʊn ˈstrʌktʃə/", "cấu trúc phân chia công việc (WBS)", "Each package in the <em>work breakdown structure</em> has one owner."],
+["PS", "milestone", "/ˈmaɪlstəʊn/", "mốc tiến độ", "Topping out is the key <em>milestone</em> for March."],
+["PS", "deliverable", "/dɪˈlɪvərəbl/", "sản phẩm bàn giao", "The main <em>deliverable</em> this month is the shop drawing set."],
+["PS", "baseline", "/ˈbeɪslaɪn/", "đường cơ sở (kế hoạch gốc)", "We compare actual progress against the approved <em>baseline</em>."],
+["PS", "critical path", "/ˈkrɪtɪkl pɑːθ/", "đường găng", "Any delay on the <em>critical path</em> delays handover."],
+["PS", "dependency", "/dɪˈpendənsi/", "quan hệ phụ thuộc", "Plastering has a <em>dependency</em> on the MEP rough-in."],
+["PS", "contingency", "/kənˈtɪndʒənsi/", "dự phòng", "We kept a 10% <em>contingency</em> for ground conditions."],
+["PS", "lead time", "/ˈliːd taɪm/", "thời gian chờ hàng", "The <em>lead time</em> for the lifts is sixteen weeks."],
+["PS", "risk register", "/rɪsk ˈredʒɪstə/", "sổ đăng ký rủi ro", "Please add the flooding issue to the <em>risk register</em>."],
+["PS", "procurement", "/prəˈkjʊəmənt/", "mua sắm / đấu thầu", "<em>Procurement</em> of structural steel must start this week."],
+["PS", "resource allocation", "/rɪˈzɔːs ˌæləˈkeɪʃn/", "phân bổ nguồn lực", "Our <em>resource allocation</em> puts two crews on Block A."],
+["SP", "kick-off meeting", "/ˈkɪk ɒf ˈmiːtɪŋ/", "cuộc họp khởi động", "The <em>kick-off meeting</em> is on Monday at the site office."],
+["SP", "subcontractor", "/ˌsʌbkənˈtræktə/", "nhà thầu phụ", "The MEP <em>subcontractor</em> is short of labour."],
+["SP", "request for information", "/rɪˈkwest fər ˌɪnfəˈmeɪʃn/", "yêu cầu cung cấp thông tin (RFI)", "We sent a <em>request for information</em> about the beam level."],
+["SP", "change order", "/tʃeɪndʒ ˈɔːdə/", "lệnh thay đổi", "The client issued a <em>change order</em> for extra parking."],
+["SP", "site instruction", "/saɪt ɪnˈstrʌkʃn/", "chỉ dẫn công trường", "The engineer gave a written <em>site instruction</em> to move the opening."],
+["SP", "assign", "/əˈsaɪn/", "giao (việc)", "I'll <em>assign</em> the drainage check to Minh."],
+["SP", "handover", "/ˈhændəʊvə/", "bàn giao", "<em>Handover</em> of Tower 1 is planned for December."],
+["TC", "progress report", "/ˈprəʊɡres rɪˈpɔːt/", "báo cáo tiến độ", "The weekly <em>progress report</em> is due every Friday."],
+["TC", "behind schedule", "/bɪˈhaɪnd ˈʃedjuːl/", "chậm tiến độ", "Facade works are two weeks <em>behind schedule</em>."],
+["TC", "over budget", "/ˈəʊvə ˈbʌdʒɪt/", "vượt ngân sách", "The piling package is 8% <em>over budget</em>."],
+["TC", "variance", "/ˈveəriəns/", "chênh lệch (so với kế hoạch)", "Explain any <em>variance</em> larger than 5%."],
+["TC", "earned value", "/ɜːnd ˈvæljuː/", "giá trị thu được (EV)", "<em>Earned value</em> tells us how much work we have actually completed."],
+["TC", "slippage", "/ˈslɪpɪdʒ/", "sự trượt tiến độ", "Rain caused three days of <em>slippage</em>."],
+["TC", "bottleneck", "/ˈbɒtlnek/", "điểm nghẽn", "The single tower crane is our <em>bottleneck</em>."],
+["TC", "escalate", "/ˈeskəleɪt/", "trình lên cấp trên", "If the design is not fixed by Friday, I will <em>escalate</em> it to the director."],
+["TC", "mitigate", "/ˈmɪtɪɡeɪt/", "giảm thiểu", "We can <em>mitigate</em> the risk by ordering pumps early."],
+["TC", "on track", "/ɒn træk/", "đúng tiến độ", "Structure works are <em>on track</em>."],
+["CF", "punch list", "/pʌntʃ lɪst/", "danh sách tồn tại cần khắc phục", "There are 42 items left on the <em>punch list</em>."],
+["CF", "sign-off", "/ˈsaɪn ɒf/", "ký xác nhận / nghiệm thu", "We need the client's <em>sign-off</em> before releasing payment."],
+["CF", "as-built drawings", "/æz bɪlt ˈdrɔːɪŋz/", "bản vẽ hoàn công", "The contractor must submit <em>as-built drawings</em> within 30 days."],
+["CF", "defects liability period", "/ˈdiːfekts ˌlaɪəˈbɪləti ˈpɪəriəd/", "thời gian bảo hành", "The <em>defects liability period</em> is twelve months."],
+["CF", "final account", "/ˈfaɪnl əˈkaʊnt/", "quyết toán", "We are still negotiating the <em>final account</em>."],
+["CF", "lessons learned", "/ˈlesnz lɜːnd/", "bài học kinh nghiệm", "Let's record the <em>lessons learned</em> before the team leaves."],
+["GC", "construction industry", "/kənˈstrʌkʃn ˈɪndəstri/", "ngành xây dựng", "The <em>construction industry</em> is one of the largest employers in the country."],
+["GC", "general contractor", "/ˈdʒenrəl kənˈtræktə/", "tổng thầu", "The <em>general contractor</em> coordinates all the trades on site."],
+["GC", "prime contractor", "/praɪm kənˈtræktə/", "nhà thầu chính", "The <em>prime contractor</em> signs the contract directly with the owner."],
+["GC", "specialty contractor", "/ˈspeʃəlti kənˈtræktə/", "nhà thầu chuyên ngành", "A <em>specialty contractor</em> will install the electrical system."],
+["GC", "owner", "/ˈəʊnə/", "chủ đầu tư", "The <em>owner</em> wants the bridge open before the rainy season."],
+["GC", "architect-engineer", "/ˈɑːkɪtekt ˌendʒɪˈnɪə/", "đơn vị tư vấn thiết kế (kiến trúc – kỹ thuật)", "The <em>architect-engineer</em> issued revised drawings this morning."],
+["GC", "design professional", "/dɪˈzaɪn prəˈfeʃənl/", "chuyên gia thiết kế", "The <em>design professional</em> must approve any change to the structure."],
+["GC", "construction contract", "/kənˈstrʌkʃn ˈkɒntrækt/", "hợp đồng thi công", "The <em>construction contract</em> sets the price and the completion date."],
+["GC", "lump-sum contract", "/lʌmp sʌm ˈkɒntrækt/", "hợp đồng trọn gói", "Under a <em>lump-sum contract</em>, the contractor carries the quantity risk."],
+["GC", "unit-price contract", "/ˈjuːnɪt praɪs ˈkɒntrækt/", "hợp đồng theo đơn giá", "A <em>unit-price contract</em> pays for the quantities actually built."],
+["GC", "cost-plus contract", "/kɒst plʌs ˈkɒntrækt/", "hợp đồng chi phí cộng phí", "The owner chose a <em>cost-plus contract</em> because the design was incomplete."],
+["GC", "negotiated contract", "/nɪˈɡəʊʃieɪtɪd ˈkɒntrækt/", "hợp đồng thương thảo", "For the hospital extension, they used a <em>negotiated contract</em>."],
+["GC", "competitive bidding", "/kəmˈpetətɪv ˈbɪdɪŋ/", "đấu thầu cạnh tranh", "Public projects are usually awarded through <em>competitive bidding</em>."],
+["GC", "bid", "/bɪd/", "hồ sơ dự thầu; giá dự thầu", "Our <em>bid</em> was 3% lower than the engineer's estimate."],
+["GC", "bidder", "/ˈbɪdə/", "nhà thầu dự thầu", "Six <em>bidders</em> attended the pre-bid meeting."],
+["GC", "low bidder", "/ləʊ ˈbɪdə/", "nhà thầu có giá thấp nhất", "The contract goes to the lowest responsible bidder, not just the <em>low bidder</em>."],
+["GC", "bidding documents", "/ˈbɪdɪŋ ˈdɒkjumənts/", "hồ sơ mời thầu", "Please read the <em>bidding documents</em> carefully before pricing."],
+["GC", "bid form", "/bɪd fɔːm/", "mẫu đơn dự thầu", "Every unit price must be written on the <em>bid form</em>."],
+["GC", "performance bond", "/pəˈfɔːməns bɒnd/", "bảo lãnh thực hiện hợp đồng", "The <em>performance bond</em> protects the owner if the contractor fails."],
+["GC", "payment bond", "/ˈpeɪmənt bɒnd/", "bảo lãnh thanh toán", "The <em>payment bond</em> guarantees that suppliers will be paid."],
+["GC", "contract bond", "/ˈkɒntrækt bɒnd/", "bảo lãnh hợp đồng", "The surety issued the <em>contract bonds</em> within two days."],
+["GC", "surety", "/ˈʃʊərəti/", "bên bảo lãnh", "The <em>surety</em> checked our financial statements before issuing the bond."],
+["GC", "insurance", "/ɪnˈʃʊərəns/", "bảo hiểm", "Builder's risk <em>insurance</em> covers damage during construction."],
+["GC", "liability", "/ˌlaɪəˈbɪləti/", "trách nhiệm pháp lý", "The contractor has <em>liability</em> for injuries on the site."],
+["GC", "contract documents", "/ˈkɒntrækt ˈdɒkjumənts/", "hồ sơ hợp đồng", "The specifications are part of the <em>contract documents</em>."],
+["GC", "drawings and specifications", "/ˈdrɔːɪŋz ənd ˌspesɪfɪˈkeɪʃnz/", "bản vẽ và chỉ dẫn kỹ thuật", "Build exactly as shown in the <em>drawings and specifications</em>."],
+["GC", "specifications", "/ˌspesɪfɪˈkeɪʃnz/", "chỉ dẫn kỹ thuật", "The <em>specifications</em> require 28-day concrete strength of 30 MPa."],
+["GC", "contract provisions", "/ˈkɒntrækt prəˈvɪʒnz/", "điều khoản hợp đồng", "The <em>contract provisions</em> allow extra time for unusual weather."],
+["GC", "contract time", "/ˈkɒntrækt taɪm/", "thời hạn hợp đồng", "The <em>contract time</em> is 70 working days."],
+["GC", "contract amount", "/ˈkɒntrækt əˈmaʊnt/", "giá trị hợp đồng", "The change increased the <em>contract amount</em> by $40,000."],
+["GC", "contract completion date", "/ˈkɒntrækt kəmˈpliːʃn deɪt/", "ngày hoàn thành theo hợp đồng", "We will finish two weeks before the <em>contract completion date</em>."],
+["GC", "liquidated damages", "/ˈlɪkwɪdeɪtɪd ˈdæmɪdʒɪz/", "tiền phạt chậm tiến độ (bồi thường định trước)", "<em>Liquidated damages</em> are $2,000 for each day of delay."],
+["GC", "notice to proceed", "/ˈnəʊtɪs tə prəˈsiːd/", "lệnh khởi công", "Work can start ten days after the <em>notice to proceed</em>."],
+["GC", "award", "/əˈwɔːd/", "trao hợp đồng", "The city will <em>award</em> the contract next Tuesday."],
+["GC", "design-construct", "/dɪˈzaɪn kənˈstrʌkt/", "thiết kế – thi công (design & build)", "In <em>design-construct</em>, one firm handles both design and construction."],
+["GC", "fast tracking", "/fɑːst ˈtrækɪŋ/", "thi công gối đầu thiết kế", "<em>Fast tracking</em> lets us pour footings while the deck is still being designed."],
+["GC", "construction manager", "/kənˈstrʌkʃn ˈmænɪdʒə/", "nhà quản lý thi công (CM)", "The <em>construction manager</em> acts as the owner's adviser."],
+["GC", "construction management", "/kənˈstrʌkʃn ˈmænɪdʒmənt/", "quản lý thi công", "Good <em>construction management</em> keeps time and cost under control."],
+["GC", "heavy construction", "/ˈhevi kənˈstrʌkʃn/", "xây dựng công trình nặng (hạ tầng)", "Dams and bridges belong to <em>heavy construction</em>."],
+["GC", "nonresidential building", "/ˌnɒnrezɪˈdenʃl ˈbɪldɪŋ/", "công trình phi nhà ở", "Schools and offices are <em>nonresidential buildings</em>."],
+["GC", "utility", "/juːˈtɪləti/", "công trình tiện ích (điện, nước, khí)", "A gas <em>utility</em> line crosses the site near the abutment."],
+["GC", "housing", "/ˈhaʊzɪŋ/", "nhà ở", "<em>Housing</em> makes up a large share of total construction."],
+["GC", "subcontract", "/ˌsʌbkənˈtrækt/", "hợp đồng thầu phụ; giao thầu phụ", "We plan to <em>subcontract</em> the painting."],
+["GC", "subcontracting", "/ˌsʌbkənˈtræktɪŋ/", "việc giao thầu phụ", "<em>Subcontracting</em> reduces the number of crafts we must manage."],
+["GC", "subbid", "/ˈsʌbbɪd/", "giá chào thầu phụ", "We received three <em>subbids</em> for the guardrail."],
+["GC", "quotation", "/kwəʊˈteɪʃn/", "báo giá", "Please send a written <em>quotation</em> by Friday."],
+["GC", "material supplier", "/məˈtɪəriəl səˈplaɪə/", "nhà cung cấp vật tư", "The <em>material supplier</em> promised delivery within a week."],
+["GC", "vendor", "/ˈvendə/", "nhà cung cấp", "The <em>vendor</em> needs a signed purchase order first."],
+["GC", "manufacturer", "/ˌmænjuˈfæktʃərə/", "nhà sản xuất", "The <em>manufacturer</em> will send an engineer to check the installation."],
+["GC", "material dealer", "/məˈtɪəriəl ˈdiːlə/", "đại lý vật tư", "The local <em>material dealer</em> keeps rebar in stock."],
+["GC", "labor union", "/ˈleɪbə ˈjuːniən/", "công đoàn", "The <em>labor union</em> agreement sets the overtime rate."],
+["GC", "craft", "/krɑːft/", "nghề; thợ theo nghề", "Each <em>craft</em> has its own wage rate."],
+["GC", "tradesman", "/ˈtreɪdzmən/", "thợ lành nghề", "Skilled tradesmen are hard to find this year."],
+["GC", "journeyman", "/ˈdʒɜːnimən/", "thợ bậc trung (đã hết học việc)", "A <em>journeyman</em> carpenter earns more than an apprentice."],
+["GC", "foreman", "/ˈfɔːmən/", "tổ trưởng; đốc công", "The concrete <em>foreman</em> checked the forms before the pour."],
+["GC", "superintendent", "/ˌsuːpərɪnˈtendənt/", "chỉ huy trưởng công trường", "The <em>superintendent</em> runs the daily work on site."],
+["GC", "field superintendent", "/fiːld ˌsuːpərɪnˈtendənt/", "chỉ huy trưởng hiện trường", "The <em>field superintendent</em> reports to the project manager."],
+["GC", "laborer", "/ˈleɪbərə/", "lao động phổ thông", "Four <em>laborers</em> are cleaning the deck."],
+["GC", "carpenter", "/ˈkɑːpəntə/", "thợ mộc (cốp pha)", "The <em>carpenters</em> are building the abutment forms."],
+["GC", "cement mason", "/sɪˈment ˈmeɪsn/", "thợ hoàn thiện bê tông", "The <em>cement masons</em> will finish the deck tomorrow."],
+["GC", "ironworker", "/ˈaɪənwɜːkə/", "thợ sắt (cốt thép, kết cấu thép)", "<em>Ironworkers</em> are tying the footing rebar."],
+["GC", "equipment operator", "/ɪˈkwɪpmənt ˈɒpəreɪtə/", "thợ vận hành máy", "The crane needs an experienced <em>equipment operator</em>."],
+["GC", "oiler", "/ˈɔɪlə/", "thợ phụ máy (bảo dưỡng, tra dầu)", "The crane crew includes an operator and an <em>oiler</em>."],
+["GC", "piledriverman", "/ˈpaɪldraɪvəmən/", "thợ đóng cọc", "Three piledrivermen worked on the pile-driving rig."],
+["GC", "truck driver", "/trʌk ˈdraɪvə/", "tài xế xe tải", "The <em>truck drivers</em> start at 6 a.m."],
+["GC", "claim", "/kleɪm/", "khiếu nại; yêu cầu bồi thường", "The contractor filed a <em>claim</em> for the extra rock excavation."],
+["GC", "dispute", "/dɪˈspjuːt/", "tranh chấp", "The <em>dispute</em> was settled without going to court."],
+["GC", "arbitration", "/ˌɑːbɪˈtreɪʃn/", "trọng tài (giải quyết tranh chấp)", "The contract requires <em>arbitration</em> for unresolved disputes."],
+["GC", "litigation", "/ˌlɪtɪˈɡeɪʃn/", "kiện tụng", "<em>Litigation</em> is slow and expensive for both parties."],
+["GC", "extra work", "/ˈekstrə wɜːk/", "công việc phát sinh", "The owner agreed to pay for the <em>extra work</em>."],
+["GC", "changed conditions", "/tʃeɪndʒd kənˈdɪʃnz/", "điều kiện thay đổi", "Boulders in the excavation are <em>changed conditions</em> under the contract."],
+["GC", "warranty", "/ˈwɒrənti/", "bảo hành", "The roof has a two-year <em>warranty</em>."],
+["GC", "guarantee", "/ˌɡærənˈtiː/", "cam kết bảo đảm", "The supplier gave a <em>guarantee</em> on delivery dates."],
+["GC", "permit", "/ˈpɜːmɪt/", "giấy phép", "We cannot start until the building <em>permit</em> is issued."],
+["GC", "inspection", "/ɪnˈspekʃn/", "kiểm tra; nghiệm thu", "Rebar <em>inspection</em> is scheduled for 9 a.m."],
+["GC", "inspector", "/ɪnˈspektə/", "giám sát viên; cán bộ kiểm tra", "The <em>inspector</em> rejected two loads of concrete."],
+["GC", "final inspection", "/ˈfaɪnl ɪnˈspekʃn/", "kiểm tra nghiệm thu cuối cùng", "The <em>final inspection</em> found only minor defects."],
+["GC", "acceptance", "/əkˈseptəns/", "chấp thuận nghiệm thu", "<em>Acceptance</em> of the bridge starts the warranty period."],
+["GC", "substantial completion", "/səbˈstænʃl kəmˈpliːʃn/", "hoàn thành cơ bản", "At <em>substantial completion</em>, the owner can use the building."],
+["GC", "project completion", "/ˈprɒdʒekt kəmˈpliːʃn/", "hoàn thành dự án", "<em>Project completion</em> is planned for the end of September."],
+["GC", "shop drawings", "/ʃɒp ˈdrɔːɪŋz/", "bản vẽ chế tạo (shop drawing)", "The steel <em>shop drawings</em> need approval before fabrication."],
+["GC", "submittal", "/səbˈmɪtl/", "hồ sơ trình duyệt", "The concrete mix <em>submittal</em> is still with the engineer."],
+["GC", "approval", "/əˈpruːvl/", "phê duyệt", "We are waiting for <em>approval</em> of the girder shop drawings."],
+["GC", "legal", "/ˈliːɡl/", "thuộc pháp lý", "Ask for <em>legal</em> advice before signing the subcontract."],
+["GC", "contractual", "/kənˈtræktʃuəl/", "thuộc hợp đồng", "We have a <em>contractual</em> duty to give notice of delay."],
+["GC", "responsibility", "/rɪˌspɒnsəˈbɪləti/", "trách nhiệm", "Site safety is the contractor's <em>responsibility</em>."],
+["GC", "risk", "/rɪsk/", "rủi ro", "Underground utilities are the biggest <em>risk</em> on this job."],
+["GC", "profit", "/ˈprɒfɪt/", "lợi nhuận", "A 5% <em>profit</em> is normal for this kind of work."],
+["GC", "fee", "/fiː/", "phí", "The construction manager is paid a fixed <em>fee</em>."],
+["GC", "design phase", "/dɪˈzaɪn feɪz/", "giai đoạn thiết kế", "Contractors can help reduce cost during the <em>design phase</em>."],
+["GC", "construction phase", "/kənˈstrʌkʃn feɪz/", "giai đoạn thi công", "Most money is spent in the <em>construction phase</em>."],
+["GC", "project stages", "/ˈprɒdʒekt ˈsteɪdʒɪz/", "các giai đoạn dự án", "Each of the <em>project stages</em> needs different skills."],
+["GC", "construction process", "/kənˈstrʌkʃn ˈprəʊses/", "quá trình thi công", "Weather affects every part of the <em>construction process</em>."],
+["GC", "construction methods", "/kənˈstrʌkʃn ˈmeθədz/", "biện pháp thi công", "The contractor chooses the <em>construction methods</em>."],
+["GC", "construction operations", "/kənˈstrʌkʃn ˌɒpəˈreɪʃnz/", "các công tác thi công", "<em>Construction operations</em> must follow a logical order."],
+["GC", "field construction", "/fiːld kənˈstrʌkʃn/", "thi công hiện trường", "<em>Field construction</em> is very different from factory production."],
+["GC", "job site", "/dʒɒb saɪt/", "công trường", "No one may enter the <em>job site</em> without a hard hat."],
+["GC", "site conditions", "/saɪt kənˈdɪʃnz/", "điều kiện hiện trường", "Check the <em>site conditions</em> before pricing the excavation."],
+["GC", "weather conditions", "/ˈweðə kənˈdɪʃnz/", "điều kiện thời tiết", "<em>Weather conditions</em> delayed the deck pour."],
+["GC", "contractor's expense", "/kənˈtræktəz ɪkˈspens/", "chi phí do nhà thầu chịu", "Rework of rejected concrete is at the <em>contractor's expense</em>."],
+["GC", "contract award", "/ˈkɒntrækt əˈwɔːd/", "việc trao hợp đồng", "The <em>contract award</em> was delayed by a protest."],
+["GC", "scope of work", "/skəʊp əv wɜːk/", "phạm vi công việc", "The <em>scope of work</em> does not include demolition."],
+["GC", "turnkey", "/ˈtɜːnkiː/", "chìa khóa trao tay", "The plant was delivered on a <em>turnkey</em> basis."],
+["MS", "management system", "/ˈmænɪdʒmənt ˈsɪstəm/", "hệ thống quản lý", "A good <em>management system</em> gives early warning of problems."],
+["MS", "project management", "/ˈprɒdʒekt ˈmænɪdʒmənt/", "quản lý dự án", "<em>Project management</em> is about planning and controlling resources."],
+["MS", "project manager", "/ˈprɒdʒekt ˈmænɪdʒə/", "giám đốc dự án; quản lý dự án", "The <em>project manager</em> approves all purchase orders."],
+["MS", "management control", "/ˈmænɪdʒmənt kənˈtrəʊl/", "kiểm soát quản lý", "Close <em>management control</em> is needed on large projects."],
+["MS", "management by exception", "/ˈmænɪdʒmənt baɪ ɪkˈsepʃn/", "quản lý theo ngoại lệ", "With <em>management by exception</em>, we focus only on items off target."],
+["MS", "management information", "/ˈmænɪdʒmənt ˌɪnfəˈmeɪʃn/", "thông tin quản lý", "<em>Management information</em> must be timely and accurate."],
+["MS", "time control", "/taɪm kənˈtrəʊl/", "kiểm soát thời gian", "<em>Time control</em> compares actual progress with the schedule."],
+["MS", "cost control", "/kɒst kənˈtrəʊl/", "kiểm soát chi phí", "<em>Cost control</em> starts with a realistic budget."],
+["MS", "financial control", "/faɪˈnænʃl kənˈtrəʊl/", "kiểm soát tài chính", "<em>Financial control</em> tracks cash coming in and going out."],
+["MS", "project control", "/ˈprɒdʒekt kənˈtrəʊl/", "kiểm soát dự án", "<em>Project control</em> depends on fast, reliable field data."],
+["MS", "feedback", "/ˈfiːdbæk/", "thông tin phản hồi", "Field <em>feedback</em> helps us improve future estimates."],
+["MS", "corrective action", "/kəˈrektɪv ˈækʃn/", "hành động khắc phục", "<em>Corrective action</em> is needed on the deck work."],
+["MS", "monitoring", "/ˈmɒnɪtərɪŋ/", "theo dõi; giám sát", "Weekly <em>monitoring</em> shows the job is slipping."],
+["MS", "reporting", "/rɪˈpɔːtɪŋ/", "việc báo cáo", "<em>Reporting</em> should not take up too much of the foreman's time."],
+["MS", "decision-making", "/dɪˈsɪʒn ˈmeɪkɪŋ/", "việc ra quyết định", "Accurate data supports better <em>decision-making</em>."],
+["MS", "field supervision", "/fiːld ˌsuːpəˈvɪʒn/", "giám sát hiện trường", "<em>Field supervision</em> is part of job overhead."],
+["MS", "field supervisor", "/fiːld ˈsuːpəvaɪzə/", "cán bộ giám sát hiện trường", "Each <em>field supervisor</em> fills in a daily time card."],
+["MS", "home office", "/həʊm ˈɒfɪs/", "văn phòng trụ sở công ty", "The <em>home office</em> processes the payroll."],
+["MS", "field office", "/fiːld ˈɒfɪs/", "văn phòng hiện trường", "The <em>field office</em> keeps a full set of drawings."],
+["MS", "job office", "/dʒɒb ˈɒfɪs/", "văn phòng ban chỉ huy công trường", "The <em>job office</em> is set up near the site entrance."],
+["MS", "company personnel", "/ˈkʌmpəni ˌpɜːsəˈnel/", "nhân sự công ty", "<em>Company personnel</em> must attend the safety briefing."],
+["MS", "project team", "/ˈprɒdʒekt tiːm/", "nhóm dự án", "The <em>project team</em> meets every Monday."],
+["MS", "management team", "/ˈmænɪdʒmənt tiːm/", "ban quản lý", "The <em>management team</em> reviewed the cost forecast."],
+["MS", "authority", "/ɔːˈθɒrəti/", "thẩm quyền", "The superintendent has <em>authority</em> to stop unsafe work."],
+["MS", "communication", "/kəˌmjuːnɪˈkeɪʃn/", "trao đổi thông tin", "Poor <em>communication</em> caused the wrong rebar delivery."],
+["MS", "coordination", "/kəʊˌɔːdɪˈneɪʃn/", "sự phối hợp", "<em>Coordination</em> between trades avoids rework."],
+["MS", "manual methods", "/ˈmænjuəl ˈmeθədz/", "phương pháp thủ công", "<em>Manual methods</em> are fine for small networks."],
+["MS", "computer applications", "/kəmˈpjuːtə ˌæplɪˈkeɪʃnz/", "ứng dụng máy tính", "<em>Computer applications</em> make schedule updates fast."],
+["MS", "scheduling software", "/ˈʃedjuːlɪŋ ˈsɒftweə/", "phần mềm lập tiến độ", "Most contractors use <em>scheduling software</em> today."],
+["MS", "database", "/ˈdeɪtəbeɪs/", "cơ sở dữ liệu", "All cost data goes into one <em>database</em>."],
+["MS", "spreadsheet", "/ˈspredʃiːt/", "bảng tính", "The estimator checked the totals in a <em>spreadsheet</em>."],
+["MS", "project objectives", "/ˈprɒdʒekt əbˈdʒektɪvz/", "mục tiêu dự án", "The <em>project objectives</em> are time, cost and quality."],
+["MS", "time objectives", "/taɪm əbˈdʒektɪvz/", "mục tiêu thời gian", "We will not meet our <em>time objectives</em> without overtime."],
+["MS", "cost overrun", "/kɒst ˈəʊvərʌn/", "vượt chi phí", "There is a <em>cost overrun</em> on the abutment forms."],
+["MS", "time overrun", "/taɪm ˈəʊvərʌn/", "vượt thời gian", "A <em>time overrun</em> means liquidated damages."],
+["MS", "trouble spots", "/ˈtrʌbl spɒts/", "điểm có vấn đề", "The report highlights the <em>trouble spots</em>."],
+["MS", "problem areas", "/ˈprɒbləm ˈeəriəz/", "khu vực có vấn đề", "Focus management attention on <em>problem areas</em>."],
+["MS", "early warning", "/ˈɜːli ˈwɔːnɪŋ/", "cảnh báo sớm", "Weekly reports give <em>early warning</em> of delays."],
+["MS", "level of detail", "/ˈlevl əv ˈdiːteɪl/", "mức độ chi tiết", "The <em>level of detail</em> depends on who uses the schedule."],
+["MS", "top-down planning", "/tɒp daʊn ˈplænɪŋ/", "lập kế hoạch từ trên xuống", "<em>Top-down planning</em> starts with the major project segments."],
+["MS", "historical record", "/hɪˈstɒrɪkl ˈrekɔːd/", "hồ sơ lịch sử", "The as-built schedule is a valuable <em>historical record</em>."],
+["MS", "cost records", "/kɒst ˈrekɔːdz/", "hồ sơ chi phí", "Keep <em>cost records</em> for future estimating."],
+["MS", "documentation", "/ˌdɒkjumenˈteɪʃn/", "hồ sơ, tài liệu", "Good <em>documentation</em> wins claims."],
+["MS", "job log", "/dʒɒb lɒɡ/", "nhật ký công trường", "Write the rain delay in the <em>job log</em>."],
+["MS", "meeting minutes", "/ˈmiːtɪŋ ˈmɪnɪts/", "biên bản họp", "I'll send the <em>meeting minutes</em> tonight."],
+["MS", "project meeting", "/ˈprɒdʒekt ˈmiːtɪŋ/", "cuộc họp dự án", "The weekly <em>project meeting</em> is on Wednesday."],
+["MS", "planning meeting", "/ˈplænɪŋ ˈmiːtɪŋ/", "cuộc họp lập kế hoạch", "The superintendents joined the <em>planning meeting</em>."],
+["MS", "policy", "/ˈpɒləsi/", "chính sách", "Company <em>policy</em> requires two quotes for every purchase."],
+["MS", "procedure", "/prəˈsiːdʒə/", "quy trình", "Follow the <em>procedure</em> for reporting accidents."],
+["MS", "guideline", "/ˈɡaɪdlaɪn/", "hướng dẫn", "These <em>guidelines</em> apply to all field staff."],
+["MS", "management attention", "/ˈmænɪdʒmənt əˈtenʃn/", "sự chú ý của lãnh đạo", "Critical activities need <em>management attention</em>."],
+["MS", "management action", "/ˈmænɪdʒmənt ˈækʃn/", "biện pháp quản lý", "The report triggers <em>management action</em> when costs rise."],
+["MS", "field management", "/fiːld ˈmænɪdʒmənt/", "quản lý hiện trường", "<em>Field management</em> depends on good planning."],
+["MS", "cost engineer", "/kɒst ˌendʒɪˈnɪə/", "kỹ sư chi phí", "The <em>cost engineer</em> prepares the monthly forecast."],
+["MS", "project engineer", "/ˈprɒdʒekt ˌendʒɪˈnɪə/", "kỹ sư dự án", "The <em>project engineer</em> handles RFIs and submittals."],
+["MS", "construction company", "/kənˈstrʌkʃn ˈkʌmpəni/", "công ty xây dựng", "The <em>construction company</em> has 200 employees."],
+["MS", "business", "/ˈbɪznəs/", "công việc kinh doanh; doanh nghiệp", "Construction is a risky <em>business</em>."],
+["MS", "day-to-day", "/deɪ tə deɪ/", "hằng ngày", "The superintendent handles <em>day-to-day</em> problems."],
+["MS", "in-house", "/ɪn haʊs/", "nội bộ", "We prepare the schedule <em>in-house</em>."],
+["ES", "cost estimate", "/kɒst ˈestɪmət/", "dự toán chi phí", "The <em>cost estimate</em> is based on current wage rates."],
+["ES", "cost estimating", "/kɒst ˈestɪmeɪtɪŋ/", "công tác lập dự toán", "<em>Cost estimating</em> takes about two weeks for a job this size."],
+["ES", "estimator", "/ˈestɪmeɪtə/", "người lập dự toán", "The <em>estimator</em> visited the site before pricing the job."],
+["ES", "estimating", "/ˈestɪmeɪtɪŋ/", "lập dự toán", "<em>Estimating</em> is part science and part judgment."],
+["ES", "estimating accuracy", "/ˈestɪmeɪtɪŋ ˈækjərəsi/", "độ chính xác của dự toán", "We compare actual costs with the bid to check <em>estimating accuracy</em>."],
+["ES", "quantity survey", "/ˈkwɒntəti ˈsɜːveɪ/", "đo bóc khối lượng", "The <em>quantity survey</em> shows 450 cubic yards of concrete."],
+["ES", "quantity takeoff", "/ˈkwɒntəti ˈteɪkɒf/", "bóc tách khối lượng", "Do the <em>quantity takeoff</em> from the latest drawings."],
+["ES", "takeoff", "/ˈteɪkɒf/", "bóc khối lượng", "The rebar <em>takeoff</em> is almost finished."],
+["ES", "work quantities", "/wɜːk ˈkwɒntətiz/", "khối lượng công việc", "<em>Work quantities</em> are measured every week."],
+["ES", "unit cost", "/ˈjuːnɪt kɒst/", "chi phí đơn vị", "The <em>unit cost</em> of formwork is $6 per square foot."],
+["ES", "unit price", "/ˈjuːnɪt praɪs/", "đơn giá", "Multiply the quantity by the <em>unit price</em>."],
+["ES", "unit-price schedule", "/ˈjuːnɪt praɪs ˈʃedjuːl/", "bảng đơn giá", "The <em>unit-price schedule</em> lists 25 bid items."],
+["ES", "labor cost", "/ˈleɪbə kɒst/", "chi phí nhân công", "<em>Labor cost</em> is the hardest cost to predict."],
+["ES", "equipment cost", "/ɪˈkwɪpmənt kɒst/", "chi phí máy thi công", "<em>Equipment cost</em> includes fuel and repairs."],
+["ES", "material cost", "/məˈtɪəriəl kɒst/", "chi phí vật liệu", "<em>Material cost</em> rose 6% since the bid."],
+["ES", "subcontract cost", "/ˌsʌbkənˈtrækt kɒst/", "chi phí thầu phụ", "<em>Subcontract cost</em> is fixed by the subcontract price."],
+["ES", "direct cost", "/dəˈrekt kɒst/", "chi phí trực tiếp", "<em>Direct cost</em> can be charged to a specific work item."],
+["ES", "indirect cost", "/ˌɪndəˈrekt kɒst/", "chi phí gián tiếp", "Supervision is an <em>indirect cost</em>."],
+["ES", "direct labor", "/dəˈrekt ˈleɪbə/", "nhân công trực tiếp", "<em>Direct labor</em> is charged to each cost code."],
+["ES", "indirect labor", "/ˌɪndəˈrekt ˈleɪbə/", "nhân công gián tiếp", "The timekeeper is <em>indirect labor</em>."],
+["ES", "job overhead", "/dʒɒb ˈəʊvəhed/", "chi phí chung công trường", "<em>Job overhead</em> includes the site office and utilities."],
+["ES", "project overhead", "/ˈprɒdʒekt ˈəʊvəhed/", "chi phí chung dự án", "<em>Project overhead</em> grows if the job runs longer."],
+["ES", "field overhead", "/fiːld ˈəʊvəhed/", "chi phí quản lý hiện trường", "<em>Field overhead</em> is about 8% of direct cost."],
+["ES", "office overhead", "/ˈɒfɪs ˈəʊvəhed/", "chi phí chung văn phòng", "<em>Office overhead</em> is shared among all projects."],
+["ES", "home office overhead", "/həʊm ˈɒfɪs ˈəʊvəhed/", "chi phí quản lý trụ sở", "<em>Home office overhead</em> covers accounting and estimating staff."],
+["ES", "overhead", "/ˈəʊvəhed/", "chi phí chung", "<em>Overhead</em> must be included in every bid."],
+["ES", "labor unit cost", "/ˈleɪbə ˈjuːnɪt kɒst/", "đơn giá nhân công", "The <em>labor unit cost</em> for stripping forms is $1.20 per square foot."],
+["ES", "equipment unit cost", "/ɪˈkwɪpmənt ˈjuːnɪt kɒst/", "đơn giá máy", "The <em>equipment unit cost</em> depends on the production rate."],
+["ES", "material unit cost", "/məˈtɪəriəl ˈjuːnɪt kɒst/", "đơn giá vật liệu", "The <em>material unit cost</em> includes delivery."],
+["ES", "production rate", "/prəˈdʌkʃn reɪt/", "năng suất", "The excavator's <em>production rate</em> is 60 cubic yards per hour."],
+["ES", "crew", "/kruː/", "tổ đội", "A <em>crew</em> of six will place the deck forms."],
+["ES", "crew hourly rate", "/kruː ˈaʊəli reɪt/", "đơn giá giờ của tổ đội", "The <em>crew hourly rate</em> is $310."],
+["ES", "hourly rate", "/ˈaʊəli reɪt/", "đơn giá theo giờ", "The crane <em>hourly rate</em> includes the operator."],
+["ES", "wage rate", "/weɪdʒ reɪt/", "mức lương (theo giờ)", "<em>Wage rates</em> rise every July under the union agreement."],
+["ES", "payroll taxes", "/ˈpeɪrəʊl ˈtæksɪz/", "thuế, bảo hiểm trên quỹ lương", "Add <em>payroll taxes</em> to the base wage."],
+["ES", "fringe benefits", "/frɪndʒ ˈbenɪfɪts/", "phúc lợi ngoài lương", "<em>Fringe benefits</em> include health insurance and pension."],
+["ES", "labor productivity", "/ˈleɪbə ˌprɒdʌkˈtɪvəti/", "năng suất lao động", "<em>Labor productivity</em> drops in very hot weather."],
+["ES", "man-hours", "/mæn ˈaʊəz/", "giờ công", "The deck needs about 900 <em>man-hours</em>."],
+["ES", "labor-hours", "/ˈleɪbə ˈaʊəz/", "giờ công lao động", "Estimate the <em>labor-hours</em> for each activity."],
+["ES", "equipment ownership", "/ɪˈkwɪpmənt ˈəʊnəʃɪp/", "chi phí sở hữu máy", "<em>Equipment ownership</em> includes depreciation and insurance."],
+["ES", "operating cost", "/ˈɒpəreɪtɪŋ kɒst/", "chi phí vận hành", "Fuel is the main <em>operating cost</em> for the dozer."],
+["ES", "ownership and operating costs", "/ˈəʊnəʃɪp ənd ˈɒpəreɪtɪŋ kɒsts/", "chi phí sở hữu và vận hành", "We use <em>ownership and operating costs</em> to set equipment rates."],
+["ES", "rental", "/ˈrentl/", "thuê (máy, thiết bị)", "Crane <em>rental</em> is cheaper than buying for one job."],
+["ES", "lease", "/liːs/", "thuê dài hạn", "The company will <em>lease</em> two loaders for a year."],
+["ES", "depreciation", "/dɪˌpriːʃiˈeɪʃn/", "khấu hao", "<em>Depreciation</em> is part of equipment cost."],
+["ES", "salvage value", "/ˈsælvɪdʒ ˈvæljuː/", "giá trị thu hồi (thanh lý)", "The truck's <em>salvage value</em> after five years is low."],
+["ES", "small tools", "/smɔːl tuːlz/", "dụng cụ cầm tay nhỏ", "<em>Small tools</em> are usually priced as a percentage of labor."],
+["ES", "contingency allowance", "/kənˈtɪndʒənsi əˈlaʊəns/", "khoản dự phòng", "Include a <em>contingency allowance</em> for bad weather."],
+["ES", "allowance", "/əˈlaʊəns/", "khoản dự trù", "The bid includes an <em>allowance</em> for dewatering."],
+["ES", "markup", "/ˈmɑːkʌp/", "tỷ lệ cộng thêm (chi phí chung, lãi)", "Our <em>markup</em> on this bid is 10%."],
+["ES", "bid price", "/bɪd praɪs/", "giá dự thầu", "The <em>bid price</em> includes overhead and profit."],
+["ES", "bid-item summary sheet", "/bɪd ˈaɪtəm ˈsʌməri ʃiːt/", "bảng tổng hợp hạng mục dự thầu", "Each bid item has a <em>bid-item summary sheet</em>."],
+["ES", "summary sheet", "/ˈsʌməri ʃiːt/", "bảng tổng hợp", "Transfer the totals to the <em>summary sheet</em>."],
+["ES", "recap sheet", "/ˈriːkæp ʃiːt/", "bảng tóm tắt dự toán", "The <em>recap sheet</em> shows the total for each bid item."],
+["ES", "lump sum", "/lʌmp sʌm/", "khoán gọn", "Mobilization is paid as a <em>lump sum</em>."],
+["ES", "mobilization", "/ˌməʊbəlaɪˈzeɪʃn/", "huy động (máy móc, nhân lực)", "<em>Mobilization</em> of the pile-driving rig takes two days."],
+["ES", "demobilization", "/diːˌməʊbəlaɪˈzeɪʃn/", "rút máy móc, nhân lực", "<em>Demobilization</em> starts after the last pile is driven."],
+["ES", "cubic yard", "/ˈkjuːbɪk jɑːd/", "yard khối (≈0,765 m³)", "The footing needs 40 <em>cubic yards</em> of concrete."],
+["ES", "lineal foot", "/ˈlɪniəl fʊt/", "foot dài (≈0,305 m)", "Guardrail is paid by the <em>lineal foot</em>."],
+["ES", "SI units", "/ˌes ˈaɪ ˈjuːnɪts/", "đơn vị đo SI", "The estimate is also given in <em>SI units</em>."],
+["ES", "pricing", "/ˈpraɪsɪŋ/", "định giá", "<em>Pricing</em> the steel was difficult because of market changes."],
+["ES", "price quotation", "/praɪs kwəʊˈteɪʃn/", "báo giá", "Get a <em>price quotation</em> for the bearing plates."],
+["ES", "detailed estimate", "/ˈdiːteɪld ˈestɪmət/", "dự toán chi tiết", "A <em>detailed estimate</em> is prepared for each bid."],
+["ES", "preliminary estimate", "/prɪˈlɪmɪnəri ˈestɪmət/", "dự toán sơ bộ", "The <em>preliminary estimate</em> was used for budgeting."],
+["ES", "conceptual estimate", "/kənˈseptʃuəl ˈestɪmət/", "ước tính khái niệm (giai đoạn ý tưởng)", "A <em>conceptual estimate</em> is based on cost per square meter."],
+["ES", "historical data", "/hɪˈstɒrɪkl ˈdeɪtə/", "số liệu lịch sử", "Our production rates come from <em>historical data</em>."],
+["ES", "past projects", "/pɑːst ˈprɒdʒekts/", "các dự án đã làm", "Costs from <em>past projects</em> guide our estimates."],
+["ES", "work type", "/wɜːk taɪp/", "loại công việc", "Group the costs by <em>work type</em>."],
+["ES", "work category", "/wɜːk ˈkætəɡəri/", "nhóm công việc", "Concrete is the largest <em>work category</em>."],
+["ES", "work classification", "/wɜːk ˌklæsɪfɪˈkeɪʃn/", "phân loại công việc", "Each <em>work classification</em> has its own cost code."],
+["ES", "cost code", "/kɒst kəʊd/", "mã chi phí", "Charge the hours to <em>cost code</em> 0310."],
+["ES", "cost account", "/kɒst əˈkaʊnt/", "tài khoản chi phí", "Open a separate <em>cost account</em> for the pipeline relocation."],
+["ES", "work item", "/wɜːk ˈaɪtəm/", "hạng mục công việc", "Each <em>work item</em> is priced separately."],
+["ES", "quantity", "/ˈkwɒntəti/", "khối lượng; số lượng", "Check the <em>quantity</em> of rebar on the summary sheet."],
+["ES", "estimated quantity", "/ˈestɪmeɪtɪd ˈkwɒntəti/", "khối lượng dự kiến", "The <em>estimated quantity</em> of excavation was too low."],
+["ES", "cost breakdown", "/kɒst ˈbreɪkdaʊn/", "bảng phân tích chi phí", "The owner asked for a <em>cost breakdown</em> of the lump sum."],
+["ES", "budget", "/ˈbʌdʒɪt/", "ngân sách", "The labor <em>budget</em> for the deck is $48,000."],
+["ES", "project budget", "/ˈprɒdʒekt ˈbʌdʒɪt/", "ngân sách dự án", "The <em>project budget</em> is based on the bid estimate."],
+["ES", "control budget", "/kənˈtrəʊl ˈbʌdʒɪt/", "ngân sách kiểm soát", "The <em>control budget</em> is divided by cost code."],
+["ES", "budget rate", "/ˈbʌdʒɪt reɪt/", "đơn giá ngân sách", "Compare actual unit costs with the <em>budget rate</em>."],
+["ES", "engineer's estimate", "/ˌendʒɪˈnɪəz ˈestɪmət/", "dự toán của tư vấn", "Our price was below the <em>engineer's estimate</em>."],
+["ES", "escalation", "/ˌeskəˈleɪʃn/", "trượt giá", "Include <em>escalation</em> for work done next year."],
+["ES", "labor rate", "/ˈleɪbə reɪt/", "đơn giá nhân công", "The <em>labor rate</em> includes taxes and benefits."],
+["ES", "equipment rate", "/ɪˈkwɪpmənt reɪt/", "đơn giá ca máy", "The <em>equipment rate</em> for the crane is $180 per hour."],
+["ES", "price", "/praɪs/", "giá", "The <em>price</em> of steel changes every month."],
+["ES", "bid item", "/bɪd ˈaɪtəm/", "hạng mục dự thầu", "<em>Bid item</em> 7 covers the concrete deck."],
+["ES", "subtotal", "/ˈsʌbtəʊtl/", "tổng phụ", "Add markup to the <em>subtotal</em>."],
+["ES", "cost per unit", "/kɒst pɜː ˈjuːnɪt/", "chi phí trên một đơn vị", "The <em>cost per unit</em> falls as the crew learns."],
+["ES", "accuracy", "/ˈækjərəsi/", "độ chính xác", "Estimating <em>accuracy</em> improves with good records."],
+["ES", "tolerance", "/ˈtɒlərəns/", "dung sai", "The estimate has a <em>tolerance</em> of plus or minus 10%."],
+["SP", "production planning", "/prəˈdʌkʃn ˈplænɪŋ/", "lập kế hoạch sản xuất (tổ chức thi công)", "<em>Production planning</em> decides how each operation will be done."],
+["SP", "site layout", "/saɪt ˈleɪaʊt/", "bố trí mặt bằng công trường", "The <em>site layout</em> shows the office, storage and crane location."],
+["SP", "temporary buildings", "/ˈtemprəri ˈbɪldɪŋz/", "nhà tạm", "<em>Temporary buildings</em> include the office and tool shed."],
+["SP", "staging area", "/ˈsteɪdʒɪŋ ˈeəriə/", "khu tập kết tạm", "Trucks wait in the <em>staging area</em>."],
+["SP", "storage", "/ˈstɔːrɪdʒ/", "kho bãi", "Cement needs dry <em>storage</em>."],
+["SP", "haul road", "/hɔːl rəʊd/", "đường công vụ", "Water the <em>haul road</em> to control dust."],
+["SP", "access", "/ˈækses/", "lối vào; tiếp cận", "<em>Access</em> to the site is from the north road."],
+["SP", "safety", "/ˈseɪfti/", "an toàn", "<em>Safety</em> is everyone's job on this site."],
+["SP", "safety program", "/ˈseɪfti ˈprəʊɡræm/", "chương trình an toàn", "Every new worker is trained in our <em>safety program</em>."],
+["SP", "safety planning", "/ˈseɪfti ˈplænɪŋ/", "lập kế hoạch an toàn", "<em>Safety planning</em> starts before the first excavation."],
+["SP", "safety equipment", "/ˈseɪfti ɪˈkwɪpmənt/", "trang thiết bị an toàn", "<em>Safety equipment</em> must be checked daily."],
+["SP", "first aid kit", "/fɜːst eɪd kɪt/", "bộ sơ cứu", "There is a <em>first aid kit</em> in every truck."],
+["SP", "fire extinguisher", "/ˈfaɪə ɪkˈstɪŋɡwɪʃə/", "bình chữa cháy", "Place a <em>fire extinguisher</em> near the fuel tank."],
+["SP", "accident", "/ˈæksɪdənt/", "tai nạn", "Report every <em>accident</em> to the superintendent."],
+["SP", "hazard", "/ˈhæzəd/", "mối nguy", "Open trenches are a serious <em>hazard</em>."],
+["SP", "quality control", "/ˈkwɒləti kənˈtrəʊl/", "kiểm soát chất lượng", "<em>Quality control</em> includes concrete cylinder tests."],
+["SP", "quality", "/ˈkwɒləti/", "chất lượng", "We cannot trade <em>quality</em> for speed."],
+["SP", "testing", "/ˈtestɪŋ/", "thí nghiệm, kiểm tra", "<em>Testing</em> of soil compaction is done by a lab."],
+["SP", "rework", "/ˌriːˈwɜːk/", "làm lại", "<em>Rework</em> on the wall cost us four days."],
+["SP", "defect", "/ˈdiːfekt/", "khuyết tật, lỗi", "The inspector marked three <em>defects</em> in the deck."],
+["SP", "material control", "/məˈtɪəriəl kənˈtrəʊl/", "quản lý vật tư", "<em>Material control</em> prevents losses on site."],
+["SP", "purchase order", "/ˈpɜːtʃəs ˈɔːdə/", "đơn đặt hàng", "Issue the <em>purchase order</em> for the piles today."],
+["SP", "purchasing", "/ˈpɜːtʃəsɪŋ/", "mua hàng", "<em>Purchasing</em> is handled by the home office."],
+["SP", "expediting", "/ˈekspədaɪtɪŋ/", "đôn đốc (giao hàng)", "<em>Expediting</em> the girders saved us a week."],
+["SP", "material delivery", "/məˈtɪəriəl dɪˈlɪvəri/", "giao vật tư", "<em>Material delivery</em> is planned for Monday morning."],
+["SP", "delivery date", "/dɪˈlɪvəri deɪt/", "ngày giao hàng", "The supplier confirmed the <em>delivery date</em>."],
+["SP", "fabrication", "/ˌfæbrɪˈkeɪʃn/", "gia công chế tạo", "<em>Fabrication</em> of the girders takes six weeks."],
+["SP", "fabricate", "/ˈfæbrɪkeɪt/", "gia công, chế tạo", "We will <em>fabricate</em> the forms in the yard."],
+["SP", "prefabricate", "/ˌpriːˈfæbrɪkeɪt/", "chế tạo sẵn", "<em>Prefabricate</em> the abutment forms before excavation is done."],
+["SP", "stored on-site", "/stɔːd ɒn saɪt/", "lưu kho tại công trường", "Materials <em>stored on-site</em> may be included in the pay request."],
+["SP", "paperwork", "/ˈpeɪpəwɜːk/", "giấy tờ", "The foreman hates the <em>paperwork</em>."],
+["SP", "look-ahead schedule", "/lʊk əˈhed ˈʃedjuːl/", "tiến độ cuốn chiếu (vài tuần tới)", "The three-week <em>look-ahead schedule</em> is updated every Friday."],
+["SP", "work plan", "/wɜːk plæn/", "kế hoạch công việc", "The foreman prepares a daily <em>work plan</em>."],
+["SP", "operation", "/ˌɒpəˈreɪʃn/", "công tác; thao tác thi công", "The pour is a critical <em>operation</em>."],
+["SP", "repetitive operations", "/rɪˈpetətɪv ˌɒpəˈreɪʃnz/", "công tác lặp lại", "<em>Repetitive operations</em> get faster over time."],
+["SP", "excavation", "/ˌekskəˈveɪʃn/", "đào đất", "<em>Excavation</em> for the abutments starts today."],
+["SP", "structural excavation", "/ˈstrʌktʃərəl ˌekskəˈveɪʃn/", "đào móng công trình", "<em>Structural excavation</em> is paid per cubic yard."],
+["SP", "unclassified excavation", "/ʌnˈklæsɪfaɪd ˌekskəˈveɪʃn/", "đào đất không phân loại", "<em>Unclassified excavation</em> includes both soil and rock."],
+["SP", "excavate", "/ˈekskəveɪt/", "đào", "<em>Excavate</em> to the bottom of the footing."],
+["SP", "backfill", "/ˈbækfɪl/", "đắp, lấp đất", "<em>Backfill</em> the abutment in 30 cm layers."],
+["SP", "grading", "/ˈɡreɪdɪŋ/", "san ủi, tạo độ dốc", "<em>Grading</em> of the approach roads is finished."],
+["SP", "fine grade", "/faɪn ɡreɪd/", "san gạt hoàn thiện", "<em>Fine grade</em> the subgrade before placing the slab."],
+["SP", "formwork", "/ˈfɔːmwɜːk/", "cốp pha", "<em>Formwork</em> is a large part of concrete cost."],
+["SP", "forms", "/fɔːmz/", "ván khuôn", "Oil the <em>forms</em> before placing the rebar."],
+["SP", "strip forms", "/strɪp fɔːmz/", "tháo cốp pha", "<em>Strip forms</em> after three days of curing."],
+["SP", "concrete", "/ˈkɒŋkriːt/", "bê tông", "The <em>concrete</em> arrives in mixer trucks."],
+["SP", "pour", "/pɔː/", "đổ (bê tông)", "We will <em>pour</em> the deck on Thursday."],
+["SP", "place concrete", "/pleɪs ˈkɒŋkriːt/", "đổ bê tông", "<em>Place concrete</em> in layers no thicker than 50 cm."],
+["SP", "curing", "/ˈkjʊərɪŋ/", "bảo dưỡng bê tông", "<em>Curing</em> must continue for seven days."],
+["SP", "cure", "/kjʊə/", "bảo dưỡng (bê tông)", "<em>Cure</em> the deck with wet burlap."],
+["SP", "rub concrete", "/rʌb ˈkɒŋkriːt/", "xoa mặt bê tông", "<em>Rub concrete</em> on the exposed faces of the abutment."],
+["SP", "finishing", "/ˈfɪnɪʃɪŋ/", "hoàn thiện", "<em>Finishing</em> of the deck needs good weather."],
+["SP", "screed", "/skriːd/", "thanh gạt (cán phẳng bê tông)", "Set the <em>screed</em> rails before the pour."],
+["SP", "saw joints", "/sɔː dʒɔɪnts/", "cắt khe co giãn", "<em>Saw joints</em> within 12 hours of placing."],
+["SP", "joint", "/dʒɔɪnt/", "khe nối", "Seal the <em>joint</em> before winter."],
+["SP", "reinforcing steel", "/ˌriːɪnˈfɔːsɪŋ stiːl/", "cốt thép", "The <em>reinforcing steel</em> arrived cut and bent."],
+["SP", "rebar", "/ˈriːbɑː/", "thép thanh (cốt thép)", "Check the <em>rebar</em> spacing before the pour."],
+["SP", "place rebar", "/pleɪs ˈriːbɑː/", "lắp đặt cốt thép", "Ironworkers will <em>place rebar</em> in the footing tomorrow."],
+["SP", "structural steel", "/ˈstrʌktʃərəl stiːl/", "thép kết cấu", "<em>Structural steel</em> is erected by crane."],
+["SP", "girder", "/ˈɡɜːdə/", "dầm", "The <em>girders</em> are 24 meters long."],
+["SP", "set girders", "/set ˈɡɜːdəz/", "lắp dầm", "We need the 90-ton crane to <em>set girders</em>."],
+["SP", "pile", "/paɪl/", "cọc", "Each abutment sits on 16 steel <em>piles</em>."],
+["SP", "piling", "/ˈpaɪlɪŋ/", "cọc; công tác cọc", "The <em>piling</em> contractor starts next week."],
+["SP", "pile driving", "/paɪl ˈdraɪvɪŋ/", "đóng cọc", "<em>Pile driving</em> is noisy, so we work only by day."],
+["SP", "drive piles", "/draɪv paɪlz/", "đóng cọc", "<em>Drive piles</em> to the depth shown on the drawings."],
+["SP", "pile-driving rig", "/paɪl ˈdraɪvɪŋ rɪɡ/", "giàn đóng cọc", "The <em>pile-driving rig</em> arrives on a low-bed trailer."],
+["SP", "pile hammer", "/paɪl ˈhæmə/", "búa đóng cọc", "The <em>pile hammer</em> needs repair."],
+["SP", "pile foundation", "/paɪl faʊnˈdeɪʃn/", "móng cọc", "The bridge has <em>pile foundations</em>."],
+["SP", "abutment", "/əˈbʌtmənt/", "mố cầu", "The east <em>abutment</em> is 80% complete."],
+["SP", "footing", "/ˈfʊtɪŋ/", "móng", "The <em>footing</em> is 1.2 meters thick."],
+["SP", "deck", "/dek/", "bản mặt cầu", "The <em>deck</em> is poured in one day."],
+["SP", "deck slab", "/dek slæb/", "bản mặt cầu (bản sàn)", "The <em>deck slab</em> is 20 cm thick."],
+["SP", "slab", "/slæb/", "bản sàn", "The <em>slab</em> needs a smooth finish."],
+["SP", "wing wall", "/wɪŋ wɔːl/", "tường cánh", "Pour the <em>wing walls</em> with the abutment."],
+["SP", "wall", "/wɔːl/", "tường", "The retaining <em>wall</em> is 4 meters high."],
+["SP", "guardrail", "/ˈɡɑːdreɪl/", "lan can, dải phân cách", "Install the <em>guardrail</em> after the deck is cured."],
+["SP", "bearing plate", "/ˈbeərɪŋ pleɪt/", "bản gối cầu", "Set the <em>bearing plates</em> level."],
+["SP", "anchor bolt", "/ˈæŋkə bəʊlt/", "bu lông neo", "The <em>anchor bolts</em> were in the wrong position."],
+["SP", "pipeline", "/ˈpaɪplaɪn/", "đường ống", "A gas <em>pipeline</em> crosses under the river."],
+["SP", "pipeline relocation", "/ˈpaɪplaɪn ˌriːləʊˈkeɪʃn/", "di dời đường ống", "<em>Pipeline relocation</em> must finish before the pile driving."],
+["SP", "lay pipe", "/leɪ paɪp/", "đặt ống", "The crew will <em>lay pipe</em> along the new route."],
+["SP", "crossing structure", "/ˈkrɒsɪŋ ˈstrʌktʃə/", "kết cấu vượt (giao cắt)", "The <em>crossing structure</em> carries the pipe over the river."],
+["SP", "crane", "/kreɪn/", "cần trục", "The <em>crane</em> is booked for three days."],
+["SP", "dozer", "/ˈdəʊzə/", "máy ủi", "The <em>dozer</em> is spreading the fill."],
+["SP", "loader", "/ˈləʊdə/", "máy xúc lật", "The <em>loader</em> is loading trucks with sand."],
+["SP", "backhoe", "/ˈbækhəʊ/", "máy đào gầu nghịch", "A <em>backhoe</em> is enough for the small trenches."],
+["SP", "compressor", "/kəmˈpresə/", "máy nén khí", "Bring the <em>compressor</em> for the jackhammers."],
+["SP", "scaffolding", "/ˈskæfəldɪŋ/", "giàn giáo", "The <em>scaffolding</em> must be inspected weekly."],
+["SP", "equipment maintenance", "/ɪˈkwɪpmənt ˈmeɪntənəns/", "bảo dưỡng máy móc", "<em>Equipment maintenance</em> is done on Saturdays."],
+["SP", "breakdown", "/ˈbreɪkdaʊn/", "hỏng hóc (máy)", "A <em>breakdown</em> of the crane stopped the girder work."],
+["SP", "idle time", "/ˈaɪdl taɪm/", "thời gian chờ (máy, người không làm việc)", "<em>Idle time</em> is charged to the job."],
+["SP", "repair", "/rɪˈpeə/", "sửa chữa", "The <em>repair</em> will take two days."],
+["SP", "cleanup", "/ˈkliːnʌp/", "dọn dẹp", "Final <em>cleanup</em> is the last activity."],
+["SP", "move in", "/muːv ɪn/", "tập kết vào công trường", "<em>Move in</em> and set up the office takes two days."],
+["SP", "layout", "/ˈleɪaʊt/", "định vị, cắm mốc", "Survey <em>layout</em> for the abutments is complete."],
+["SP", "survey", "/ˈsɜːveɪ/", "khảo sát; trắc đạc", "The <em>survey</em> crew set the centerline today."],
+["SP", "clearing", "/ˈklɪərɪŋ/", "phát quang mặt bằng", "<em>Clearing</em> and grubbing must be done first."],
+["SP", "dewatering", "/diːˈwɔːtərɪŋ/", "hút nước hố móng", "<em>Dewatering</em> pumps run day and night."],
+["SP", "river diversion", "/ˈrɪvə daɪˈvɜːʃn/", "chuyển dòng sông", "<em>River diversion</em> is needed during low water."],
+["SP", "flood", "/flʌd/", "lũ", "A <em>flood</em> damaged the cofferdam."],
+["SP", "emergency crew", "/ɪˈmɜːdʒənsi kruː/", "đội ứng cứu khẩn cấp", "An <em>emergency crew</em> was called at midnight."],
+["SP", "damage report", "/ˈdæmɪdʒ rɪˈpɔːt/", "báo cáo thiệt hại", "Send the <em>damage report</em> to the insurer."],
+["SP", "weather delay", "/ˈweðə dɪˈleɪ/", "chậm do thời tiết", "We had four <em>weather delays</em> in March."],
+["SP", "rain day", "/reɪn deɪ/", "ngày mưa (không thi công)", "The contract allows eight <em>rain days</em>."],
+["SP", "overtime", "/ˈəʊvətaɪm/", "làm thêm giờ", "<em>Overtime</em> costs 50% more per hour."],
+["SP", "shift", "/ʃɪft/", "ca làm việc", "We will work two <em>shifts</em> on the deck."],
+["SP", "multiple shifts", "/ˈmʌltɪpl ʃɪfts/", "làm nhiều ca", "<em>Multiple shifts</em> reduce the project duration."],
+["SP", "personnel", "/ˌpɜːsəˈnel/", "nhân sự", "Only trained <em>personnel</em> may operate the crane."],
+["SP", "trades", "/treɪdz/", "các nghề (thợ)", "All <em>trades</em> attend the Monday toolbox talk."],
+["SP", "installation", "/ˌɪnstəˈleɪʃn/", "lắp đặt", "<em>Installation</em> of the bearings needs a surveyor."],
+["SP", "erection", "/ɪˈrekʃn/", "lắp dựng", "Steel <em>erection</em> starts in May."],
+["SP", "assembly", "/əˈsembli/", "lắp ghép", "<em>Assembly</em> of the forms is done on the ground."],
+["SP", "on-site", "/ɒn saɪt/", "tại công trường", "We have an <em>on-site</em> concrete lab."],
+["SP", "off-site", "/ɒf saɪt/", "ngoài công trường", "The girders are fabricated <em>off-site</em>."],
+["PS", "project planning", "/ˈprɒdʒekt ˈplænɪŋ/", "lập kế hoạch dự án", "<em>Project planning</em> decides what will be done and in what order."],
+["PS", "project scheduling", "/ˈprɒdʒekt ˈʃedjuːlɪŋ/", "lập tiến độ dự án", "<em>Project scheduling</em> adds time to the plan."],
+["PS", "planning and scheduling", "/ˈplænɪŋ ənd ˈʃedjuːlɪŋ/", "lập kế hoạch và tiến độ", "<em>Planning and scheduling</em> are two separate steps."],
+["PS", "job plan", "/dʒɒb plæn/", "kế hoạch thi công", "The <em>job plan</em> shows how the bridge will be built."],
+["PS", "job logic", "/dʒɒb ˈlɒdʒɪk/", "logic thi công", "The <em>job logic</em> says the deck follows the girders."],
+["PS", "network", "/ˈnetwɜːk/", "mạng (sơ đồ mạng)", "The <em>network</em> for the bridge has 70 activities."],
+["PS", "project network", "/ˈprɒdʒekt ˈnetwɜːk/", "sơ đồ mạng dự án", "Print the <em>project network</em> on one large sheet."],
+["PS", "network diagram", "/ˈnetwɜːk ˈdaɪəɡræm/", "sơ đồ mạng", "The <em>network diagram</em> shows all dependencies."],
+["PS", "network logic", "/ˈnetwɜːk ˈlɒdʒɪk/", "logic sơ đồ mạng", "Check the <em>network logic</em> before computing times."],
+["PS", "activity", "/ækˈtɪvəti/", "công việc (trong tiến độ)", "Each <em>activity</em> must have a clear start and finish."],
+["PS", "activity duration", "/ækˈtɪvəti djuˈreɪʃn/", "thời gian thực hiện công việc", "The <em>activity duration</em> is five working days."],
+["PS", "activity times", "/ækˈtɪvəti taɪmz/", "các mốc thời gian của công việc", "<em>Activity times</em> are computed from the network."],
+["PS", "activity number", "/ækˈtɪvəti ˈnʌmbə/", "mã số công việc", "Use the <em>activity number</em> when you report progress."],
+["PS", "activity box", "/ækˈtɪvəti bɒks/", "ô công việc (trên sơ đồ)", "Write the duration inside the <em>activity box</em>."],
+["PS", "activity description", "/ækˈtɪvəti dɪˈskrɪpʃn/", "mô tả công việc", "Keep each <em>activity description</em> short."],
+["PS", "critical activity", "/ˈkrɪtɪkl ækˈtɪvəti/", "công việc găng", "A <em>critical activity</em> has zero total float."],
+["PS", "noncritical activity", "/nɒnˈkrɪtɪkl ækˈtɪvəti/", "công việc không găng", "<em>Noncritical activities</em> can be delayed a little."],
+["PS", "critical path method", "/ˈkrɪtɪkl pɑːθ ˈmeθəd/", "phương pháp đường găng (CPM)", "The <em>critical path method</em> is used on most large projects."],
+["PS", "CPM", "/ˌsiː piː ˈem/", "phương pháp đường găng", "Our contract requires a <em>CPM</em> schedule."],
+["PS", "longest path", "/ˈlɒŋɡɪst pɑːθ/", "đường dài nhất", "The critical path is the <em>longest path</em> through the network."],
+["PS", "multiple critical paths", "/ˈmʌltɪpl ˈkrɪtɪkl pɑːðz/", "nhiều đường găng", "<em>Multiple critical paths</em> make the job hard to control."],
+["PS", "precedence diagram", "/ˈpresɪdəns ˈdaɪəɡræm/", "sơ đồ quan hệ trước sau (PDM)", "Most software uses the <em>precedence diagram</em>."],
+["PS", "precedence notation", "/ˈpresɪdəns nəʊˈteɪʃn/", "ký hiệu trước sau", "In <em>precedence notation</em>, activities are boxes."],
+["PS", "arrow diagram", "/ˈærəʊ ˈdaɪəɡræm/", "sơ đồ mũi tên (AOA)", "In an <em>arrow diagram</em>, each activity is an arrow."],
+["PS", "arrow notation", "/ˈærəʊ nəʊˈteɪʃn/", "ký hiệu mũi tên", "<em>Arrow notation</em> needs dummy activities."],
+["PS", "dummy activity", "/ˈdʌmi ækˈtɪvəti/", "công việc giả", "A <em>dummy activity</em> has zero duration."],
+["PS", "node", "/nəʊd/", "nút", "Each <em>node</em> marks an event."],
+["PS", "event", "/ɪˈvent/", "sự kiện", "An <em>event</em> takes no time."],
+["PS", "event time", "/ɪˈvent taɪm/", "thời điểm sự kiện", "Compute the early <em>event time</em> first."],
+["PS", "dependency line", "/dɪˈpendənsi laɪn/", "đường phụ thuộc", "Draw a <em>dependency line</em> from excavation to footing."],
+["PS", "sequence", "/ˈsiːkwəns/", "trình tự", "The <em>sequence</em> is excavate, form, pour, backfill."],
+["PS", "sequential relationship", "/sɪˈkwenʃl rɪˈleɪʃnʃɪp/", "quan hệ trình tự", "There is a <em>sequential relationship</em> between pouring and stripping."],
+["PS", "preceding activity", "/prɪˈsiːdɪŋ ækˈtɪvəti/", "công việc đi trước", "The <em>preceding activity</em> is the footing pour."],
+["PS", "following activity", "/ˈfɒləʊɪŋ ækˈtɪvəti/", "công việc đi sau", "The <em>following activity</em> cannot start until this one ends."],
+["PS", "restraint", "/rɪˈstreɪnt/", "ràng buộc", "A physical <em>restraint</em> means the forms must be in place first."],
+["PS", "constraint", "/kənˈstreɪnt/", "ràng buộc", "A resource <em>constraint</em> limits us to one crane."],
+["PS", "physical limit", "/ˈfɪzɪkl ˈlɪmɪt/", "giới hạn vật lý", "Space on the deck is a <em>physical limit</em> for crews."],
+["PS", "logical limit", "/ˈlɒdʒɪkl ˈlɪmɪt/", "giới hạn logic", "Curing time is a <em>logical limit</em> we cannot shorten."],
+["PS", "lag", "/læɡ/", "độ trễ", "There is a two-day <em>lag</em> between pouring and stripping."],
+["PS", "lead", "/liːd/", "độ gối đầu", "A <em>lead</em> lets the next activity start early."],
+["PS", "finish-to-start", "/ˈfɪnɪʃ tə stɑːt/", "quan hệ kết thúc – bắt đầu", "Most links are <em>finish-to-start</em>."],
+["PS", "start-to-start", "/stɑːt tə stɑːt/", "quan hệ bắt đầu – bắt đầu", "Use <em>start-to-start</em> for overlapping work."],
+["PS", "working days", "/ˈwɜːkɪŋ deɪz/", "ngày làm việc", "The job takes 70 <em>working days</em>."],
+["PS", "calendar days", "/ˈkælɪndə deɪz/", "ngày lịch", "Contract time is often in <em>calendar days</em>."],
+["PS", "calendar dates", "/ˈkælɪndə deɪts/", "ngày theo lịch", "Convert working days to <em>calendar dates</em>."],
+["PS", "project calendar", "/ˈprɒdʒekt ˈkælɪndə/", "lịch dự án", "The <em>project calendar</em> excludes public holidays."],
+["PS", "forward pass", "/ˈfɔːwəd pɑːs/", "tính xuôi", "The <em>forward pass</em> gives early start and early finish."],
+["PS", "backward pass", "/ˈbækwəd pɑːs/", "tính ngược", "The <em>backward pass</em> gives late start and late finish."],
+["PS", "early start", "/ˈɜːli stɑːt/", "thời điểm bắt đầu sớm (ES)", "The <em>early start</em> of the deck pour is day 42."],
+["PS", "early finish", "/ˈɜːli ˈfɪnɪʃ/", "thời điểm kết thúc sớm (EF)", "<em>Early finish</em> equals early start plus duration."],
+["PS", "late start", "/leɪt stɑːt/", "thời điểm bắt đầu muộn (LS)", "The <em>late start</em> is the latest the activity can begin."],
+["PS", "late finish", "/leɪt ˈfɪnɪʃ/", "thời điểm kết thúc muộn (LF)", "<em>Late finish</em> comes from the backward pass."],
+["PS", "float", "/fləʊt/", "thời gian dự trữ", "This activity has six days of <em>float</em>."],
+["PS", "total float", "/ˈtəʊtl fləʊt/", "dự trữ toàn phần", "<em>Total float</em> is late start minus early start."],
+["PS", "free float", "/friː fləʊt/", "dự trữ tự do", "<em>Free float</em> does not affect the next activity."],
+["PS", "project duration", "/ˈprɒdʒekt djuˈreɪʃn/", "thời gian thực hiện dự án", "The <em>project duration</em> is 50 working days."],
+["PS", "completion date", "/kəmˈpliːʃn deɪt/", "ngày hoàn thành", "The <em>completion date</em> is October 15."],
+["PS", "start date", "/stɑːt deɪt/", "ngày khởi công", "The <em>start date</em> depends on the permit."],
+["PS", "finish date", "/ˈfɪnɪʃ deɪt/", "ngày kết thúc", "Show the <em>finish date</em> for each activity."],
+["PS", "time scale", "/taɪm skeɪl/", "thang thời gian", "Draw the network on a <em>time scale</em>."],
+["PS", "time-scaled network", "/taɪm skeɪld ˈnetwɜːk/", "sơ đồ mạng có thang thời gian", "A <em>time-scaled network</em> is easy for foremen to read."],
+["PS", "bar chart", "/bɑː tʃɑːt/", "biểu đồ ngang (Gantt)", "The <em>bar chart</em> is the simplest way to show the schedule."],
+["PS", "Gantt chart", "/ɡænt tʃɑːt/", "biểu đồ Gantt", "Print the <em>Gantt chart</em> for the site office."],
+["PS", "schedule", "/ˈʃedjuːl/", "tiến độ; lịch", "The <em>schedule</em> shows the deck pour in week six."],
+["PS", "project schedule", "/ˈprɒdʒekt ˈʃedjuːl/", "tiến độ dự án", "The <em>project schedule</em> is updated weekly."],
+["PS", "baseline schedule", "/ˈbeɪslaɪn ˈʃedjuːl/", "tiến độ cơ sở", "Compare progress with the <em>baseline schedule</em>."],
+["PS", "updated schedule", "/ʌpˈdeɪtɪd ˈʃedjuːl/", "tiến độ cập nhật", "The <em>updated schedule</em> shows a two-day delay."],
+["PS", "as-built schedule", "/æz bɪlt ˈʃedjuːl/", "tiến độ thực tế (hoàn công)", "The <em>as-built schedule</em> records what really happened."],
+["PS", "early-start schedule", "/ˈɜːli stɑːt ˈʃedjuːl/", "tiến độ theo thời điểm sớm", "The <em>early-start schedule</em> leaves float at the end."],
+["PS", "late-start schedule", "/leɪt stɑːt ˈʃedjuːl/", "tiến độ theo thời điểm muộn", "A <em>late-start schedule</em> has no room for problems."],
+["PS", "key-date schedule", "/kiː deɪt ˈʃedjuːl/", "tiến độ các mốc chính", "The owner only wants a <em>key-date schedule</em>."],
+["PS", "master schedule", "/ˈmɑːstə ˈʃedjuːl/", "tiến độ tổng", "The <em>master schedule</em> covers all three phases."],
+["PS", "time schedule", "/taɪm ˈʃedjuːl/", "tiến độ thời gian", "Attach the <em>time schedule</em> to the bid."],
+["PS", "WBS", "/ˌdʌbljuː biː ˈes/", "cấu trúc phân chia công việc", "Code each activity with its <em>WBS</em> number."],
+["PS", "project segment", "/ˈprɒdʒekt ˈseɡmənt/", "phân đoạn dự án", "Divide the bridge into <em>project segments</em>."],
+["PS", "work package", "/wɜːk ˈpækɪdʒ/", "gói công việc", "Each <em>work package</em> has one responsible foreman."],
+["PS", "hammock activity", "/ˈhæmək ækˈtɪvəti/", "công việc võng (hammock)", "A <em>hammock activity</em> spans a group of activities."],
+["PS", "interface event", "/ˈɪntəfeɪs ɪˈvent/", "sự kiện giao diện", "An <em>interface event</em> links two subnetworks."],
+["PS", "time estimate", "/taɪm ˈestɪmət/", "ước tính thời gian", "Get <em>time estimates</em> from the foremen."],
+["PS", "duration estimate", "/djuˈreɪʃn ˈestɪmət/", "ước tính thời gian thực hiện", "<em>Duration estimates</em> should be realistic."],
+["PS", "PERT", "/pɜːt/", "kỹ thuật đánh giá và rà soát chương trình (PERT)", "<em>PERT</em> uses three time estimates for each activity."],
+["PS", "probability", "/ˌprɒbəˈbɪləti/", "xác suất", "There is a 70% <em>probability</em> of finishing on time."],
+["PS", "standard deviation", "/ˈstændəd ˌdiːviˈeɪʃn/", "độ lệch chuẩn", "The <em>standard deviation</em> of the project time is three days."],
+["PS", "normal distribution", "/ˈnɔːml ˌdɪstrɪˈbjuːʃn/", "phân phối chuẩn", "PERT assumes a <em>normal distribution</em> of project time."],
+["PS", "mean", "/miːn/", "giá trị trung bình", "The <em>mean</em> duration is 52 days."],
+["PS", "uncertainty", "/ʌnˈsɜːtnti/", "tính không chắc chắn", "Weather adds <em>uncertainty</em> to the schedule."],
+["PS", "weather calendar", "/ˈweðə ˈkælɪndə/", "lịch thời tiết", "The <em>weather calendar</em> shows fewer working days in winter."],
+["PS", "weather effects", "/ˈweðə ɪˈfekts/", "ảnh hưởng thời tiết", "Handle <em>weather effects</em> in the schedule, not in each duration."],
+["PS", "scheduling", "/ˈʃedjuːlɪŋ/", "lập tiến độ", "<em>Scheduling</em> turns the plan into dates."],
+["PS", "schedule analysis", "/ˈʃedjuːl əˈnæləsɪs/", "phân tích tiến độ", "<em>Schedule analysis</em> showed the true cause of delay."],
+["PS", "impacted baseline", "/ɪmˈpæktɪd ˈbeɪslaɪn/", "tiến độ cơ sở có tác động (để phân tích chậm trễ)", "The <em>impacted baseline</em> shows the effect of the owner's changes."],
+["PS", "delay analysis", "/dɪˈleɪ əˈnæləsɪs/", "phân tích chậm trễ", "The claim includes a <em>delay analysis</em>."],
+["PS", "early completion", "/ˈɜːli kəmˈpliːʃn/", "hoàn thành sớm", "An <em>early completion</em> schedule must be accepted by the owner."],
+["PS", "planning team", "/ˈplænɪŋ tiːm/", "nhóm lập kế hoạch", "The <em>planning team</em> includes the superintendent."],
+["PS", "detailed planning", "/ˈdiːteɪld ˈplænɪŋ/", "lập kế hoạch chi tiết", "<em>Detailed planning</em> prevents surprises on site."],
+["PS", "operational plan", "/ˌɒpəˈreɪʃənl plæn/", "kế hoạch tác nghiệp", "The <em>operational plan</em> covers the next three weeks."],
+["PS", "project outline", "/ˈprɒdʒekt ˈaʊtlaɪn/", "dàn ý dự án", "Start with a <em>project outline</em> of major segments."],
+["PS", "logic change", "/ˈlɒdʒɪk tʃeɪndʒ/", "thay đổi logic", "A <em>logic change</em> can shift the critical path."],
+["PS", "time computations", "/taɪm ˌkɒmpjuˈteɪʃnz/", "tính toán thời gian", "<em>Time computations</em> can be done by hand for small networks."],
+["PS", "computer scheduling", "/kəmˈpjuːtə ˈʃedjuːlɪŋ/", "lập tiến độ bằng máy tính", "<em>Computer scheduling</em> saves hours of calculation."],
+["PS", "terminal activity", "/ˈtɜːmɪnl ækˈtɪvəti/", "công việc kết thúc", "Cleanup is the <em>terminal activity</em>."],
+["PS", "initial activity", "/ɪˈnɪʃl ækˈtɪvəti/", "công việc khởi đầu", "Move-in is the <em>initial activity</em>."],
+["PS", "concurrent activities", "/kənˈkʌrənt ækˈtɪvətiz/", "công việc song song", "<em>Concurrent activities</em> share the same crew."],
+["PS", "overlap", "/ˌəʊvəˈlæp/", "chồng lấn", "Let the forming <em>overlap</em> with the excavation."],
+["PS", "parallel", "/ˈpærəlel/", "song song", "Run the two abutments in <em>parallel</em>."],
+["PS", "predecessor", "/ˈpriːdɪsesə/", "công việc đi trước", "Each activity lists its <em>predecessors</em>."],
+["PS", "successor", "/səkˈsesə/", "công việc đi sau", "The deck pour has two <em>successors</em>."],
+["PS", "elapsed time", "/ɪˈlæpst taɪm/", "thời gian đã trôi qua", "<em>Elapsed time</em> includes weekends."],
+["PS", "cutoff date", "/ˈkʌtɒf deɪt/", "ngày chốt số liệu", "The <em>cutoff date</em> for the update is Friday."],
+["PS", "data date", "/ˈdeɪtə deɪt/", "ngày dữ liệu (ngày cập nhật)", "All remaining work starts after the <em>data date</em>."],
+["RA", "time acceleration", "/taɪm əkˌseləˈreɪʃn/", "đẩy nhanh tiến độ", "<em>Time acceleration</em> costs money."],
+["RA", "project shortening", "/ˈprɒdʒekt ˈʃɔːtnɪŋ/", "rút ngắn dự án", "<em>Project shortening</em> focuses on critical activities."],
+["RA", "time reduction", "/taɪm rɪˈdʌkʃn/", "giảm thời gian", "Each day of <em>time reduction</em> costs about $1,500."],
+["RA", "crash", "/kræʃ/", "rút ngắn tối đa (crash)", "We will <em>crash</em> the deck forming."],
+["RA", "crash time", "/kræʃ taɪm/", "thời gian rút ngắn tối đa", "The <em>crash time</em> for the footing is three days."],
+["RA", "crash cost", "/kræʃ kɒst/", "chi phí rút ngắn tối đa", "The <em>crash cost</em> is too high for this activity."],
+["RA", "normal time", "/ˈnɔːml taɪm/", "thời gian bình thường", "The <em>normal time</em> is six days with one crew."],
+["RA", "normal cost", "/ˈnɔːml kɒst/", "chi phí bình thường", "<em>Normal cost</em> uses the cheapest method."],
+["RA", "least-cost expediting", "/liːst kɒst ˈekspədaɪtɪŋ/", "đẩy nhanh với chi phí thấp nhất", "<em>Least-cost expediting</em> shortens the cheapest critical activity first."],
+["RA", "time-cost trade-off", "/taɪm kɒst treɪd ɒf/", "đánh đổi thời gian – chi phí", "The <em>time-cost trade-off</em> shows the best project duration."],
+["RA", "additional direct cost", "/əˈdɪʃənl dəˈrekt kɒst/", "chi phí trực tiếp bổ sung", "Overtime adds <em>additional direct cost</em>."],
+["RA", "expedite", "/ˈekspədaɪt/", "đẩy nhanh", "Can we <em>expedite</em> the steel delivery?"],
+["RA", "expediting action", "/ˈekspədaɪtɪŋ ˈækʃn/", "biện pháp đẩy nhanh", "The first <em>expediting action</em> is a second crew."],
+["RA", "acceleration", "/əkˌseləˈreɪʃn/", "sự đẩy nhanh", "The owner ordered <em>acceleration</em> to recover the delay."],
+["RA", "resource", "/rɪˈzɔːs/", "nguồn lực", "Cranes are our scarcest <em>resource</em>."],
+["RA", "resource management", "/rɪˈzɔːs ˈmænɪdʒmənt/", "quản lý nguồn lực", "<em>Resource management</em> avoids peaks and idle crews."],
+["RA", "resource leveling", "/rɪˈzɔːs ˈlevəlɪŋ/", "cân bằng nguồn lực", "<em>Resource leveling</em> smooths the labor curve."],
+["RA", "manpower leveling", "/ˈmænpaʊə ˈlevəlɪŋ/", "cân bằng nhân lực", "<em>Manpower leveling</em> keeps the crew size steady."],
+["RA", "resource availability", "/rɪˈzɔːs əˌveɪləˈbɪləti/", "khả năng sẵn có của nguồn lực", "<em>Resource availability</em> limits the schedule."],
+["RA", "labor demand", "/ˈleɪbə dɪˈmɑːnd/", "nhu cầu nhân công", "<em>Labor demand</em> peaks in week five."],
+["RA", "labor supply", "/ˈleɪbə səˈplaɪ/", "nguồn cung nhân công", "<em>Labor supply</em> is tight in summer."],
+["RA", "labor shortage", "/ˈleɪbə ˈʃɔːtɪdʒ/", "thiếu nhân công", "A <em>labor shortage</em> delayed the finishing work."],
+["RA", "labor requirements", "/ˈleɪbə rɪˈkwaɪəmənts/", "yêu cầu nhân công", "Plot the <em>labor requirements</em> for each week."],
+["RA", "equipment needs", "/ɪˈkwɪpmənt niːdz/", "nhu cầu máy móc", "<em>Equipment needs</em> are listed by week."],
+["RA", "equipment management", "/ɪˈkwɪpmənt ˈmænɪdʒmənt/", "quản lý máy móc", "Good <em>equipment management</em> cuts idle time."],
+["RA", "resource histogram", "/rɪˈzɔːs ˈhɪstəɡræm/", "biểu đồ nguồn lực", "The <em>resource histogram</em> shows a peak of 30 carpenters."],
+["RA", "heuristic", "/hjuˈrɪstɪk/", "phương pháp kinh nghiệm", "Leveling software uses a simple <em>heuristic</em>."],
+["RA", "priority", "/praɪˈɒrəti/", "ưu tiên", "Critical activities get <em>priority</em> for the crane."],
+["RA", "crew size", "/kruː saɪz/", "quy mô tổ đội", "Increase the <em>crew size</em> from four to six."],
+["RA", "allocation", "/ˌæləˈkeɪʃn/", "phân bổ", "The <em>allocation</em> of cranes is decided weekly."],
+["RA", "availability", "/əˌveɪləˈbɪləti/", "khả năng sẵn có", "Check crane <em>availability</em> before you commit."],
+["RA", "peak", "/piːk/", "đỉnh (nhu cầu)", "The <em>peak</em> labor demand is 40 workers."],
+["RA", "subnetwork", "/ˈsʌbnetwɜːk/", "sơ đồ mạng con", "The pipeline work is a separate <em>subnetwork</em>."],
+["RA", "rescheduling", "/ˌriːˈʃedjuːlɪŋ/", "lập lại tiến độ", "<em>Rescheduling</em> the pour avoids the rain."],
+["TC", "time management", "/taɪm ˈmænɪdʒmənt/", "quản lý thời gian", "Project <em>time management</em> continues until the last day."],
+["TC", "time status", "/taɪm ˈsteɪtəs/", "tình trạng thời gian (tiến độ)", "The <em>time status</em> report is issued every week."],
+["TC", "progress", "/ˈprəʊɡres/", "tiến độ (thực tế)", "<em>Progress</em> on the deck is good this week."],
+["TC", "job progress", "/dʒɒb ˈprəʊɡres/", "tiến độ công trường", "<em>Job progress</em> is measured in percent complete."],
+["TC", "progress measurement", "/ˈprəʊɡres ˈmeʒəmənt/", "đo lường tiến độ", "<em>Progress measurement</em> uses quantities, not hours."],
+["TC", "percent complete", "/pəˈsent kəmˈpliːt/", "phần trăm hoàn thành", "The footing is 60 <em>percent complete</em>."],
+["TC", "progress chart", "/ˈprəʊɡres tʃɑːt/", "biểu đồ tiến độ", "Update the <em>progress chart</em> on the office wall."],
+["TC", "progress curve", "/ˈprəʊɡres kɜːv/", "đường cong tiến độ (S-curve)", "The <em>progress curve</em> is falling below plan."],
+["TC", "S-curve", "/es kɜːv/", "đường cong chữ S", "The <em>S-curve</em> shows cumulative cost over time."],
+["TC", "weekly progress report", "/ˈwiːkli ˈprəʊɡres rɪˈpɔːt/", "báo cáo tiến độ tuần", "The <em>weekly progress report</em> goes to the owner."],
+["TC", "progress reporting", "/ˈprəʊɡres rɪˈpɔːtɪŋ/", "báo cáo tiến độ", "<em>Progress reporting</em> must be simple for the foremen."],
+["TC", "field progress", "/fiːld ˈprəʊɡres/", "tiến độ hiện trường", "<em>Field progress</em> is reported by area."],
+["TC", "actual start", "/ˈæktʃuəl stɑːt/", "ngày bắt đầu thực tế", "Record the <em>actual start</em> of every activity."],
+["TC", "actual finish", "/ˈæktʃuəl ˈfɪnɪʃ/", "ngày kết thúc thực tế", "The <em>actual finish</em> was two days late."],
+["TC", "expired working days", "/ɪkˈspaɪəd ˈwɜːkɪŋ deɪz/", "số ngày làm việc đã trôi qua", "Twenty <em>expired working days</em> have passed."],
+["TC", "schedule update", "/ˈʃedjuːl ʌpˈdeɪt/", "cập nhật tiến độ", "The <em>schedule update</em> is due Monday."],
+["TC", "updating", "/ʌpˈdeɪtɪŋ/", "cập nhật", "<em>Updating</em> takes one hour each week."],
+["TC", "network update", "/ˈnetwɜːk ʌpˈdeɪt/", "cập nhật sơ đồ mạng", "After the <em>network update</em>, a new critical path appeared."],
+["TC", "delay", "/dɪˈleɪ/", "chậm trễ", "The <em>delay</em> was caused by late steel delivery."],
+["TC", "project delay", "/ˈprɒdʒekt dɪˈleɪ/", "chậm trễ dự án", "<em>Project delay</em> leads to extra overhead cost."],
+["TC", "job delay", "/dʒɒb dɪˈleɪ/", "chậm trễ công trường", "Each <em>job delay</em> is recorded in the log."],
+["TC", "ahead of schedule", "/əˈhed əv ˈʃedjuːl/", "vượt tiến độ", "The excavation is <em>ahead of schedule</em>."],
+["TC", "on schedule", "/ɒn ˈʃedjuːl/", "đúng tiến độ", "The project is <em>on schedule</em>."],
+["TC", "target date", "/ˈtɑːɡɪt deɪt/", "ngày mục tiêu", "The <em>target date</em> for the deck is June 30."],
+["TC", "deadline", "/ˈdedlaɪn/", "hạn chót", "The <em>deadline</em> for the pay request is the 25th."],
+["TC", "time goals", "/taɪm ɡəʊlz/", "mục tiêu thời gian", "Weekly <em>time goals</em> keep crews focused."],
+["TC", "progress monitoring", "/ˈprəʊɡres ˈmɒnɪtərɪŋ/", "theo dõi tiến độ", "<em>Progress monitoring</em> is the superintendent's job."],
+["TC", "time card", "/taɪm kɑːd/", "thẻ chấm công", "Fill in the <em>time card</em> every day."],
+["TC", "daily time card", "/ˈdeɪli taɪm kɑːd/", "thẻ chấm công ngày", "The foreman signs the <em>daily time card</em>."],
+["TC", "equipment time card", "/ɪˈkwɪpmənt taɪm kɑːd/", "thẻ giờ máy", "The operator fills in the <em>equipment time card</em>."],
+["TC", "quantity report", "/ˈkwɒntəti rɪˈpɔːt/", "báo cáo khối lượng", "The <em>quantity report</em> shows work done this week."],
+["TC", "work accomplished", "/wɜːk əˈkʌmplɪʃt/", "khối lượng đã thực hiện", "<em>Work accomplished</em> is measured at the end of each week."],
+["TC", "work completed", "/wɜːk kəmˈpliːtɪd/", "công việc đã hoàn thành", "<em>Work completed</em> this month is 22% of the contract."],
+["TC", "status", "/ˈsteɪtəs/", "tình trạng", "What is the <em>status</em> of the bearing plates?"],
+["TC", "current status", "/ˈkʌrənt ˈsteɪtəs/", "tình trạng hiện tại", "The report shows the <em>current status</em> of each activity."],
+["TC", "forecast", "/ˈfɔːkɑːst/", "dự báo", "The <em>forecast</em> shows completion on September 20."],
+["TC", "slip", "/slɪp/", "trượt (tiến độ)", "Don't let the girder delivery <em>slip</em> again."],
+["TC", "recover", "/rɪˈkʌvə/", "lấy lại (thời gian bị mất)", "We can <em>recover</em> two days on the deck."],
+["TC", "monitor", "/ˈmɒnɪtə/", "theo dõi", "<em>Monitor</em> the float on near-critical activities."],
+["TC", "sensitive activity", "/ˈsensətɪv ækˈtɪvəti/", "công việc nhạy cảm", "A <em>sensitive activity</em> has very little float."],
+["TC", "trend", "/trend/", "xu hướng", "The <em>trend</em> shows productivity improving."],
+["CF", "project cost system", "/ˈprɒdʒekt kɒst ˈsɪstəm/", "hệ thống chi phí dự án", "The <em>project cost system</em> compares actual and budgeted costs."],
+["CF", "cost accounting", "/kɒst əˈkaʊntɪŋ/", "kế toán chi phí", "<em>Cost accounting</em> tracks money spent on each work item."],
+["CF", "cost accounting system", "/kɒst əˈkaʊntɪŋ ˈsɪstəm/", "hệ thống kế toán chi phí", "Our <em>cost accounting system</em> uses 40 cost codes."],
+["CF", "financial accounting", "/faɪˈnænʃl əˈkaʊntɪŋ/", "kế toán tài chính", "<em>Financial accounting</em> serves the tax office and the bank."],
+["CF", "cost report", "/kɒst rɪˈpɔːt/", "báo cáo chi phí", "The weekly <em>cost report</em> shows labor overruns."],
+["CF", "labor cost report", "/ˈleɪbə kɒst rɪˈpɔːt/", "báo cáo chi phí nhân công", "The <em>labor cost report</em> shows hours and unit costs."],
+["CF", "equipment cost report", "/ɪˈkwɪpmənt kɒst rɪˈpɔːt/", "báo cáo chi phí máy", "The <em>equipment cost report</em> is issued monthly."],
+["CF", "cost forecast", "/kɒst ˈfɔːkɑːst/", "dự báo chi phí", "The <em>cost forecast</em> shows a final cost of $1.2 million."],
+["CF", "cost forecast report", "/kɒst ˈfɔːkɑːst rɪˈpɔːt/", "báo cáo dự báo chi phí", "The <em>cost forecast report</em> goes to senior management."],
+["CF", "actual cost", "/ˈæktʃuəl kɒst/", "chi phí thực tế", "<em>Actual cost</em> is higher than budget on the deck."],
+["CF", "budgeted cost", "/ˈbʌdʒɪtɪd kɒst/", "chi phí theo ngân sách", "<em>Budgeted cost</em> for the footing is $18,000."],
+["CF", "estimated cost", "/ˈestɪmeɪtɪd kɒst/", "chi phí dự toán", "The <em>estimated cost</em> of the change is $12,000."],
+["CF", "final cost", "/ˈfaɪnl kɒst/", "chi phí cuối cùng", "The <em>final cost</em> was within 2% of the estimate."],
+["CF", "cost to date", "/kɒst tə deɪt/", "chi phí lũy kế đến nay", "<em>Cost to date</em> is $640,000."],
+["CF", "cost to complete", "/kɒst tə kəmˈpliːt/", "chi phí để hoàn thành", "<em>Cost to complete</em> the abutments is $90,000."],
+["CF", "estimate at completion", "/ˈestɪmət ət kəmˈpliːʃn/", "dự báo chi phí khi hoàn thành (EAC)", "The <em>estimate at completion</em> is above the budget."],
+["CF", "cost status", "/kɒst ˈsteɪtəs/", "tình trạng chi phí", "The <em>cost status</em> is reported weekly."],
+["CF", "cost variance", "/kɒst ˈveəriəns/", "chênh lệch chi phí", "The <em>cost variance</em> on concrete is negative."],
+["CF", "schedule variance", "/ˈʃedjuːl ˈveəriəns/", "chênh lệch tiến độ", "A negative <em>schedule variance</em> means we are behind."],
+["CF", "earned value management", "/ɜːnd ˈvæljuː ˈmænɪdʒmənt/", "quản lý giá trị thu được (EVM)", "<em>Earned value management</em> combines time and cost."],
+["CF", "planned value", "/plænd ˈvæljuː/", "giá trị kế hoạch (PV)", "<em>Planned value</em> is the budget for work scheduled."],
+["CF", "actual cost of work performed", "/ˈæktʃuəl kɒst əv wɜːk pəˈfɔːmd/", "chi phí thực tế của công việc đã thực hiện (ACWP)", "Compare the <em>actual cost of work performed</em> with earned value."],
+["CF", "budgeted cost of work performed", "/ˈbʌdʒɪtɪd kɒst əv wɜːk pəˈfɔːmd/", "chi phí ngân sách của công việc đã thực hiện (BCWP)", "The <em>budgeted cost of work performed</em> is another name for earned value."],
+["CF", "cost performance index", "/kɒst pəˈfɔːməns ˈɪndeks/", "chỉ số hiệu quả chi phí (CPI)", "A <em>cost performance index</em> below 1.0 means overspending."],
+["CF", "schedule performance index", "/ˈʃedjuːl pəˈfɔːməns ˈɪndeks/", "chỉ số hiệu quả tiến độ (SPI)", "The <em>schedule performance index</em> is 0.92."],
+["CF", "cost overruns", "/kɒst ˈəʊvərʌnz/", "các khoản vượt chi", "<em>Cost overruns</em> are flagged in red."],
+["CF", "savings", "/ˈseɪvɪŋz/", "khoản tiết kiệm", "The new forms gave <em>savings</em> of $4,000."],
+["CF", "projected savings", "/prəˈdʒektɪd ˈseɪvɪŋz/", "khoản tiết kiệm dự kiến", "<em>Projected savings</em> come from the cheaper pump rental."],
+["CF", "charge", "/tʃɑːdʒ/", "hạch toán vào; khoản phí", "<em>Charge</em> the crane hours to cost code 0420."],
+["CF", "charged", "/tʃɑːdʒd/", "được hạch toán", "The hours were <em>charged</em> to the wrong account."],
+["CF", "cost information", "/kɒst ˌɪnfəˈmeɪʃn/", "thông tin chi phí", "<em>Cost information</em> must reach the field quickly."],
+["CF", "cost data", "/kɒst ˈdeɪtə/", "dữ liệu chi phí", "<em>Cost data</em> from this job will help the next bid."],
+["CF", "cost analysis", "/kɒst əˈnæləsɪs/", "phân tích chi phí", "A <em>cost analysis</em> showed the cause of the overrun."],
+["CF", "labor expense", "/ˈleɪbə ɪkˈspens/", "chi phí nhân công (đã chi)", "<em>Labor expense</em> was high because of overtime."],
+["CF", "equipment expense", "/ɪˈkwɪpmənt ɪkˈspens/", "chi phí máy (đã chi)", "<em>Equipment expense</em> includes fuel and repairs."],
+["CF", "expense", "/ɪkˈspens/", "chi phí", "Every <em>expense</em> needs an approval signature."],
+["CF", "expense account", "/ɪkˈspens əˈkaʊnt/", "tài khoản chi phí", "Small purchases go to the general <em>expense account</em>."],
+["CF", "payroll", "/ˈpeɪrəʊl/", "bảng lương", "<em>Payroll</em> is processed every Friday."],
+["CF", "timekeeper", "/ˈtaɪmkiːpə/", "người chấm công", "The <em>timekeeper</em> collects the time cards."],
+["CF", "account number", "/əˈkaʊnt ˈnʌmbə/", "số tài khoản (kế toán)", "Each cost code links to an <em>account number</em>."],
+["CF", "distribution code", "/ˌdɪstrɪˈbjuːʃn kəʊd/", "mã phân bổ chi phí", "Write the <em>distribution code</em> on the invoice."],
+["CF", "invoice", "/ˈɪnvɔɪs/", "hóa đơn", "Send the <em>invoice</em> to the owner's accounts office."],
+["CF", "project financial management", "/ˈprɒdʒekt faɪˈnænʃl ˈmænɪdʒmənt/", "quản lý tài chính dự án", "<em>Project financial management</em> focuses on cash."],
+["CF", "cash flow", "/kæʃ fləʊ/", "dòng tiền", "The <em>cash flow</em> is negative for the first three months."],
+["CF", "negative cash flow", "/ˈneɡətɪv kæʃ fləʊ/", "dòng tiền âm", "<em>Negative cash flow</em> must be covered by a bank loan."],
+["CF", "cash income", "/kæʃ ˈɪnkʌm/", "tiền thu vào", "<em>Cash income</em> comes from monthly payments."],
+["CF", "cash receipts", "/kæʃ rɪˈsiːts/", "các khoản thu tiền", "<em>Cash receipts</em> lag one month behind the work."],
+["CF", "cash disbursements", "/kæʃ dɪsˈbɜːsmənts/", "các khoản chi tiền", "<em>Cash disbursements</em> are highest in month four."],
+["CF", "disbursement", "/dɪsˈbɜːsmənt/", "khoản chi", "Each <em>disbursement</em> needs a purchase order."],
+["CF", "working capital", "/ˈwɜːkɪŋ ˈkæpɪtl/", "vốn lưu động", "The contractor needs <em>working capital</em> to start the job."],
+["CF", "financing", "/ˈfaɪnænsɪŋ/", "tài trợ vốn", "<em>Financing</em> costs rise if payments are late."],
+["CF", "interest", "/ˈɪntrəst/", "lãi suất; tiền lãi", "We pay <em>interest</em> on the bank loan."],
+["CF", "loan", "/ləʊn/", "khoản vay", "The <em>loan</em> covers the first two months."],
+["CF", "progress payment", "/ˈprəʊɡres ˈpeɪmənt/", "thanh toán theo tiến độ", "The owner makes a <em>progress payment</em> every month."],
+["CF", "monthly pay request", "/ˈmʌnθli peɪ rɪˈkwest/", "đề nghị thanh toán hằng tháng", "Submit the <em>monthly pay request</em> by the 25th."],
+["CF", "pay request", "/peɪ rɪˈkwest/", "đề nghị thanh toán", "The <em>pay request</em> includes materials stored on-site."],
+["CF", "payment schedule", "/ˈpeɪmənt ˈʃedjuːl/", "lịch thanh toán", "The <em>payment schedule</em> is in the contract."],
+["CF", "schedule of values", "/ˈʃedjuːl əv ˈvæljuːz/", "bảng phân bổ giá trị hợp đồng", "The <em>schedule of values</em> breaks the lump sum into items."],
+["CF", "retainage", "/rɪˈteɪnɪdʒ/", "tiền giữ lại (bảo lưu)", "The owner holds 10% <em>retainage</em> until completion."],
+["CF", "final payment", "/ˈfaɪnl ˈpeɪmənt/", "thanh toán lần cuối", "<em>Final payment</em> follows the final inspection."],
+["CF", "front-end loading", "/frʌnt end ˈləʊdɪŋ/", "dồn giá vào hạng mục đầu", "<em>Front-end loading</em> improves early cash flow."],
+["CF", "accrued costs", "/əˈkruːd kɒsts/", "chi phí phát sinh chưa thanh toán (dồn tích)", "<em>Accrued costs</em> include bills not yet paid."],
+["CF", "accrued income", "/əˈkruːd ˈɪnkʌm/", "doanh thu dồn tích", "<em>Accrued income</em> is work done but not yet paid."],
+["CF", "costs incurred", "/kɒsts ɪnˈkɜːd/", "chi phí đã phát sinh", "<em>Costs incurred</em> this month total $210,000."],
+["CF", "pro rata", "/prəʊ ˈrɑːtə/", "theo tỷ lệ", "Overhead is shared on a <em>pro rata</em> basis."],
+["CF", "value of work", "/ˈvæljuː əv wɜːk/", "giá trị công việc", "The <em>value of work</em> done this month is $180,000."],
+["CF", "contract value", "/ˈkɒntrækt ˈvæljuː/", "giá trị hợp đồng", "Work done is 45% of the <em>contract value</em>."],
+["CF", "revenue", "/ˈrevənjuː/", "doanh thu", "<em>Revenue</em> this year is up 12%."],
+["CF", "margin", "/ˈmɑːdʒɪn/", "biên lợi nhuận", "The <em>margin</em> on this job is only 3%."],
+["CF", "loss", "/lɒs/", "lỗ", "The job made a small <em>loss</em>."],
+["CF", "time-cost envelope", "/taɪm kɒst ˈenvələʊp/", "vùng bao thời gian – chi phí", "The project stays inside the <em>time-cost envelope</em>."],
+["CF", "cumulative cost", "/ˈkjuːmjələtɪv kɒst/", "chi phí lũy kế", "Plot <em>cumulative cost</em> against time."],
+["CF", "monthly cost", "/ˈmʌnθli kɒst/", "chi phí hằng tháng", "<em>Monthly cost</em> peaks in July."],
+["CF", "cost curve", "/kɒst kɜːv/", "đường cong chi phí", "The <em>cost curve</em> follows an S shape."],
+["CF", "audit", "/ˈɔːdɪt/", "kiểm toán", "The owner has the right to <em>audit</em> our records."],
+["CF", "bank", "/bæŋk/", "ngân hàng", "The <em>bank</em> wants a cash flow forecast."],
+["CF", "tax", "/tæks/", "thuế", "Sales <em>tax</em> is added to material prices."],
+["CF", "cost reduction", "/kɒst rɪˈdʌkʃn/", "giảm chi phí", "<em>Cost reduction</em> should not affect safety."],
+["CF", "value engineering", "/ˈvæljuː ˌendʒɪˈnɪərɪŋ/", "phân tích giá trị (value engineering)", "<em>Value engineering</em> saved 5% on the foundation."],
+["CF", "extra costs", "/ˈekstrə kɒsts/", "chi phí phát sinh thêm", "<em>Extra costs</em> from the delay are part of the claim."],
+["CF", "field measurement", "/fiːld ˈmeʒəmənt/", "đo đạc hiện trường", "<em>Field measurement</em> confirmed 420 lineal feet of guardrail."],
+["CF", "quantities accomplished", "/ˈkwɒntətiz əˈkʌmplɪʃt/", "khối lượng đã hoàn thành", "<em>Quantities accomplished</em> are reported weekly."],
+["CF", "cost-control purposes", "/kɒst kənˈtrəʊl ˈpɜːpəsɪz/", "mục đích kiểm soát chi phí", "For <em>cost-control purposes</em>, split the deck into two accounts."],
+["CF", "budget to date", "/ˈbʌdʒɪt tə deɪt/", "ngân sách lũy kế", "<em>Budget to date</em> is $600,000."],
+["CF", "overrun", "/ˈəʊvərʌn/", "phần vượt", "The <em>overrun</em> on forms is $3,500."],
+["CF", "underrun", "/ˈʌndərʌn/", "phần hụt (chi dưới mức)", "There is an <em>underrun</em> on excavation."],
+["CF", "payment", "/ˈpeɪmənt/", "khoản thanh toán", "The <em>payment</em> arrived ten days late."],
+["CF", "money", "/ˈmʌni/", "tiền", "Time is <em>money</em> on a construction site."],
+["CF", "dollar value", "/ˈdɒlə ˈvæljuː/", "giá trị bằng tiền", "The <em>dollar value</em> of work in place is $2 million."],
+["CF", "record keeping", "/ˈrekɔːd ˈkiːpɪŋ/", "lưu trữ hồ sơ", "Good <em>record keeping</em> supports payment claims."],
+["GW", "accomplish", "/əˈkʌmplɪʃ/", "hoàn thành, thực hiện", "The crew can <em>accomplish</em> the forming in three days."],
+["GW", "accomplishment", "/əˈkʌmplɪʃmənt/", "thành quả; việc hoàn thành", "Weekly <em>accomplishment</em> is measured in square feet of forms."],
+["GW", "accurate", "/ˈækjərət/", "chính xác", "<em>Accurate</em> quantities are the base of a good estimate."],
+["GW", "actual", "/ˈæktʃuəl/", "thực tế", "The <em>actual</em> cost was lower than expected."],
+["GW", "actually", "/ˈæktʃuəli/", "thực sự, trên thực tế", "How many piles were <em>actually</em> driven?"],
+["GW", "adequate", "/ˈædɪkwət/", "đầy đủ, thỏa đáng", "Make sure there is <em>adequate</em> lighting for night work."],
+["GW", "adjust", "/əˈdʒʌst/", "điều chỉnh", "<em>Adjust</em> the schedule after the rain."],
+["GW", "adjustment", "/əˈdʒʌstmənt/", "sự điều chỉnh", "A small <em>adjustment</em> to the crew size solved the problem."],
+["GW", "advance", "/ədˈvɑːns/", "tiến lên; trước", "Order the bearings well in <em>advance</em>."],
+["GW", "advantage", "/ədˈvɑːntɪdʒ/", "lợi thế", "The main <em>advantage</em> of precast is speed."],
+["GW", "alternative", "/ɔːlˈtɜːnətɪv/", "phương án thay thế", "Let's look at an <em>alternative</em> for the river crossing."],
+["GW", "amount", "/əˈmaʊnt/", "số lượng; số tiền", "The <em>amount</em> of rework was small."],
+["GW", "analysis", "/əˈnæləsɪs/", "phân tích", "The <em>analysis</em> shows three critical paths."],
+["GW", "analyze", "/ˈænəlaɪz/", "phân tích", "<em>Analyze</em> the cost overrun before the meeting."],
+["GW", "anticipate", "/ænˈtɪsɪpeɪt/", "dự đoán, lường trước", "We <em>anticipate</em> problems with the river level."],
+["GW", "anticipated", "/ænˈtɪsɪpeɪtɪd/", "được dự kiến", "<em>Anticipated</em> costs are included in the forecast."],
+["GW", "applicable", "/əˈplɪkəbl/", "áp dụng được", "Use the <em>applicable</em> wage rates."],
+["GW", "application", "/ˌæplɪˈkeɪʃn/", "ứng dụng; việc áp dụng", "This chapter covers scheduling <em>applications</em>."],
+["GW", "apply", "/əˈplaɪ/", "áp dụng", "<em>Apply</em> the same method to the second abutment."],
+["GW", "appropriate", "/əˈprəʊpriət/", "phù hợp", "Choose the <em>appropriate</em> crew for each task."],
+["GW", "approve", "/əˈpruːv/", "phê duyệt", "The engineer must <em>approve</em> the mix design."],
+["GW", "approximate", "/əˈprɒksɪmət/", "xấp xỉ", "Give me an <em>approximate</em> figure for now."],
+["GW", "approximately", "/əˈprɒksɪmətli/", "khoảng, xấp xỉ", "The deck takes <em>approximately</em> ten days."],
+["GW", "arrangement", "/əˈreɪndʒmənt/", "sự sắp xếp", "The site <em>arrangement</em> allows two cranes."],
+["GW", "aspect", "/ˈæspekt/", "khía cạnh", "Safety is an important <em>aspect</em> of planning."],
+["GW", "assigned", "/əˈsaɪnd/", "được giao", "Each activity is <em>assigned</em> to a crew."],
+["GW", "assist", "/əˈsɪst/", "hỗ trợ", "The engineer will <em>assist</em> the superintendent."],
+["GW", "assume", "/əˈsjuːm/", "giả định", "<em>Assume</em> five working days per week."],
+["GW", "assumption", "/əˈsʌmpʃn/", "giả định", "This schedule is based on the <em>assumption</em> of normal weather."],
+["GW", "assure", "/əˈʃʊə/", "bảo đảm", "We must <em>assure</em> the owner that the date will be met."],
+["GW", "attention", "/əˈtenʃn/", "sự chú ý", "Pay special <em>attention</em> to the critical activities."],
+["GW", "available", "/əˈveɪləbl/", "sẵn có", "Is the crane <em>available</em> next week?"],
+["GW", "average", "/ˈævərɪdʒ/", "trung bình", "The <em>average</em> production is 80 piles per week."],
+["GW", "balance", "/ˈbæləns/", "cân đối; phần còn lại", "The <em>balance</em> will be paid at completion."],
+["GW", "basis", "/ˈbeɪsɪs/", "cơ sở", "The estimate is the <em>basis</em> for cost control."],
+["GW", "beginning", "/bɪˈɡɪnɪŋ/", "sự bắt đầu", "Plan the job from <em>beginning</em> to end."],
+["GW", "behind", "/bɪˈhaɪnd/", "chậm hơn; phía sau", "We are three days <em>behind</em>."],
+["GW", "benefit", "/ˈbenɪfɪt/", "lợi ích", "The <em>benefit</em> of planning is fewer surprises."],
+["GW", "breakdown structure", "/ˈbreɪkdaʊn ˈstrʌktʃə/", "cấu trúc phân chia", "The <em>breakdown structure</em> follows the bid items."],
+["GW", "calculate", "/ˈkælkjuleɪt/", "tính toán", "<em>Calculate</em> the early start for each activity."],
+["GW", "calculation", "/ˌkælkjuˈleɪʃn/", "phép tính", "Check the <em>calculation</em> twice."],
+["GW", "capability", "/ˌkeɪpəˈbɪləti/", "năng lực", "The crane's <em>capability</em> is 90 tons."],
+["GW", "capacity", "/kəˈpæsəti/", "công suất; sức chứa", "The plant's <em>capacity</em> is 60 cubic meters per hour."],
+["GW", "category", "/ˈkætəɡəri/", "nhóm, hạng mục", "Put fuel in the equipment <em>category</em>."],
+["GW", "cause", "/kɔːz/", "nguyên nhân; gây ra", "What was the <em>cause</em> of the delay?"],
+["GW", "characteristic", "/ˌkærəktəˈrɪstɪk/", "đặc điểm", "Each project has its own <em>characteristics</em>."],
+["GW", "check", "/tʃek/", "kiểm tra", "<em>Check</em> the rebar before the inspector comes."],
+["GW", "checklist", "/ˈtʃeklɪst/", "danh mục kiểm tra", "Use the <em>checklist</em> before every pour."],
+["GW", "circumstances", "/ˈsɜːkəmstənsɪz/", "hoàn cảnh", "Under these <em>circumstances</em>, overtime is justified."],
+["GW", "classification", "/ˌklæsɪfɪˈkeɪʃn/", "sự phân loại", "The <em>classification</em> of costs must be consistent."],
+["GW", "clearly", "/ˈklɪəli/", "rõ ràng", "State <em>clearly</em> who is responsible."],
+["GW", "combination", "/ˌkɒmbɪˈneɪʃn/", "sự kết hợp", "A <em>combination</em> of overtime and a second crew is needed."],
+["GW", "commitment", "/kəˈmɪtmənt/", "cam kết", "We made a <em>commitment</em> to finish by June."],
+["GW", "common practice", "/ˈkɒmən ˈpræktɪs/", "thông lệ", "It is <em>common practice</em> to hold 10% retainage."],
+["GW", "comparison", "/kəmˈpærɪsn/", "sự so sánh", "A <em>comparison</em> of bids showed a wide range."],
+["GW", "compare", "/kəmˈpeə/", "so sánh", "<em>Compare</em> actual hours with the budget."],
+["GW", "compile", "/kəmˈpaɪl/", "tổng hợp", "<em>Compile</em> the cost data every Friday."],
+["GW", "complete", "/kəmˈpliːt/", "hoàn thành; đầy đủ", "The footing is <em>complete</em>."],
+["GW", "completely", "/kəmˈpliːtli/", "hoàn toàn", "The site was <em>completely</em> flooded."],
+["GW", "complex", "/ˈkɒmpleks/", "phức tạp", "The pipeline relocation is <em>complex</em>."],
+["GW", "complexity", "/kəmˈpleksəti/", "độ phức tạp", "The <em>complexity</em> of the project requires a CPM schedule."],
+["GW", "component", "/kəmˈpəʊnənt/", "thành phần", "Labor is the largest <em>component</em> of cost."],
+["GW", "comprehensive", "/ˌkɒmprɪˈhensɪv/", "toàn diện", "We need a <em>comprehensive</em> safety plan."],
+["GW", "compute", "/kəmˈpjuːt/", "tính toán", "<em>Compute</em> the float for each activity."],
+["GW", "computation", "/ˌkɒmpjuˈteɪʃn/", "sự tính toán", "The <em>computation</em> takes only seconds by computer."],
+["GW", "concept", "/ˈkɒnsept/", "khái niệm", "The <em>concept</em> of float is easy to understand."],
+["GW", "concerning", "/kənˈsɜːnɪŋ/", "liên quan đến", "I have a question <em>concerning</em> the deck forms."],
+["GW", "condition", "/kənˈdɪʃn/", "điều kiện; tình trạng", "The road is in poor <em>condition</em>."],
+["GW", "conflict", "/ˈkɒnflɪkt/", "xung đột", "There is a <em>conflict</em> between the two crews."],
+["GW", "consequently", "/ˈkɒnsɪkwəntli/", "do đó", "Rain stopped work; <em>consequently</em>, the pour moved to Monday."],
+["GW", "consideration", "/kənˌsɪdəˈreɪʃn/", "sự cân nhắc", "Safety is the first <em>consideration</em>."],
+["GW", "considerable", "/kənˈsɪdərəbl/", "đáng kể", "The change caused <em>considerable</em> delay."],
+["GW", "consistent", "/kənˈsɪstənt/", "nhất quán", "Use <em>consistent</em> units throughout the estimate."],
+["GW", "constant", "/ˈkɒnstənt/", "không đổi", "Keep the crew size <em>constant</em>."],
+["GW", "continuous", "/kənˈtɪnjuəs/", "liên tục", "The concrete deck needs a <em>continuous</em> pour."],
+["GW", "convenient", "/kənˈviːniənt/", "thuận tiện", "Friday is a <em>convenient</em> day for the update."],
+["GW", "coordinate", "/kəʊˈɔːdɪneɪt/", "phối hợp", "<em>Coordinate</em> the deliveries with the crane schedule."],
+["GW", "correct", "/kəˈrekt/", "đúng; sửa", "<em>Correct</em> the error in the time card."],
+["GW", "criteria", "/kraɪˈtɪəriə/", "tiêu chí", "What are the <em>criteria</em> for acceptance?"],
+["GW", "cumulative", "/ˈkjuːmjələtɪv/", "lũy kế", "<em>Cumulative</em> progress is 65%."],
+["GW", "current", "/ˈkʌrənt/", "hiện tại", "What is the <em>current</em> completion date?"],
+["GW", "customary", "/ˈkʌstəməri/", "theo thông lệ", "It is <em>customary</em> to pay subcontractors monthly."],
+["GW", "data", "/ˈdeɪtə/", "dữ liệu", "Collect the <em>data</em> at the end of each shift."],
+["GW", "decision", "/dɪˈsɪʒn/", "quyết định", "We need a <em>decision</em> on the steel today."],
+["GW", "define", "/dɪˈfaɪn/", "xác định, định nghĩa", "<em>Define</em> the scope before pricing."],
+["GW", "definition", "/ˌdefɪˈnɪʃn/", "định nghĩa", "The <em>definition</em> of completion is in the contract."],
+["GW", "degree", "/dɪˈɡriː/", "mức độ", "The <em>degree</em> of detail depends on the user."],
+["GW", "delayed", "/dɪˈleɪd/", "bị chậm", "The <em>delayed</em> activity is now critical."],
+["GW", "demand", "/dɪˈmɑːnd/", "nhu cầu; yêu cầu", "The <em>demand</em> for cranes is high this summer."],
+["GW", "depend on", "/dɪˈpend ɒn/", "phụ thuộc vào", "The pour date depends on the weather."],
+["GW", "description", "/dɪˈskrɪpʃn/", "mô tả", "Write a short <em>description</em> of the problem."],
+["GW", "desirable", "/dɪˈzaɪərəbl/", "nên có, đáng mong muốn", "A flat labor curve is <em>desirable</em>."],
+["GW", "detail", "/ˈdiːteɪl/", "chi tiết", "Check every <em>detail</em> of the formwork."],
+["GW", "detailed", "/ˈdiːteɪld/", "chi tiết", "Prepare a <em>detailed</em> plan for the deck pour."],
+["GW", "determine", "/dɪˈtɜːmɪn/", "xác định", "<em>Determine</em> the critical path first."],
+["GW", "develop", "/dɪˈveləp/", "xây dựng, phát triển", "<em>Develop</em> the schedule with the foremen."],
+["GW", "development", "/dɪˈveləpmənt/", "sự phát triển", "The <em>development</em> of the plan took a week."],
+["GW", "deviation", "/ˌdiːviˈeɪʃn/", "độ lệch", "Report any <em>deviation</em> from the plan."],
+["GW", "device", "/dɪˈvaɪs/", "thiết bị; công cụ", "The bar chart is a simple <em>device</em> for showing the plan."],
+["GW", "difference", "/ˈdɪfrəns/", "sự khác biệt", "The <em>difference</em> between budget and actual is $2,000."],
+["GW", "difficult", "/ˈdɪfɪkəlt/", "khó khăn", "Night work is <em>difficult</em> and expensive."],
+["GW", "discussion", "/dɪˈskʌʃn/", "thảo luận", "After some <em>discussion</em>, we chose precast girders."],
+["GW", "distribution", "/ˌdɪstrɪˈbjuːʃn/", "phân bổ; phân phối", "The <em>distribution</em> of costs is shown in the table."],
+["GW", "divide", "/dɪˈvaɪd/", "chia", "<em>Divide</em> the job into segments."],
+["GW", "document", "/ˈdɒkjumənt/", "tài liệu; ghi lại", "<em>Document</em> every instruction from the owner."],
+["GW", "duration", "/djuˈreɪʃn/", "thời gian thực hiện", "What is the <em>duration</em> of the pour?"],
+["GW", "effective", "/ɪˈfektɪv/", "hiệu quả", "The new method was very <em>effective</em>."],
+["GW", "efficient", "/ɪˈfɪʃnt/", "hiệu suất cao", "An <em>efficient</em> site layout saves walking time."],
+["GW", "effort", "/ˈefət/", "nỗ lực, công sức", "It took great <em>effort</em> to recover the delay."],
+["GW", "element", "/ˈelɪmənt/", "yếu tố; cấu kiện", "Each <em>element</em> of the bridge has a cost code."],
+["GW", "eliminate", "/ɪˈlɪmɪneɪt/", "loại bỏ", "<em>Eliminate</em> waiting time between crews."],
+["GW", "emphasis", "/ˈemfəsɪs/", "sự nhấn mạnh", "The <em>emphasis</em> is on practical methods."],
+["GW", "enable", "/ɪˈneɪbl/", "cho phép", "The software <em>enables</em> fast updates."],
+["GW", "ensure", "/ɪnˈʃʊə/", "đảm bảo", "<em>Ensure</em> all workers wear safety glasses."],
+["GW", "entire", "/ɪnˈtaɪə/", "toàn bộ", "The <em>entire</em> job took ten weeks."],
+["GW", "equal", "/ˈiːkwəl/", "bằng", "Total float is <em>equal</em> to zero."],
+["GW", "error", "/ˈerə/", "lỗi", "An <em>error</em> in the takeoff cost us $5,000."],
+["GW", "essential", "/ɪˈsenʃl/", "thiết yếu", "Good communication is <em>essential</em>."],
+["GW", "establish", "/ɪˈstæblɪʃ/", "thiết lập", "<em>Establish</em> a budget for each cost code."],
+["GW", "estimate", "/ˈestɪmeɪt/", "ước tính; dự toán", "<em>Estimate</em> the time needed for each activity."],
+["GW", "evaluate", "/ɪˈvæljueɪt/", "đánh giá", "<em>Evaluate</em> the three bids carefully."],
+["GW", "evaluation", "/ɪˌvæljuˈeɪʃn/", "sự đánh giá", "The <em>evaluation</em> of bids takes two weeks."],
+["GW", "exceed", "/ɪkˈsiːd/", "vượt quá", "Costs must not <em>exceed</em> the budget."],
+["GW", "excessive", "/ɪkˈsesɪv/", "quá mức", "<em>Excessive</em> overtime reduces productivity."],
+["GW", "expected", "/ɪkˈspektɪd/", "được dự kiến", "The <em>expected</em> finish date is May 10."],
+["GW", "experience", "/ɪkˈspɪəriəns/", "kinh nghiệm", "The superintendent has 20 years of <em>experience</em>."],
+["GW", "explain", "/ɪkˈspleɪn/", "giải thích", "<em>Explain</em> the delay in the monthly report."],
+["GW", "extent", "/ɪkˈstent/", "mức độ, phạm vi", "To what <em>extent</em> did the rain affect progress?"],
+["GW", "factor", "/ˈfæktə/", "yếu tố", "Weather is a major <em>factor</em> in this schedule."],
+["GW", "feasible", "/ˈfiːzəbl/", "khả thi", "Is a five-day pour cycle <em>feasible</em>?"],
+["GW", "figure", "/ˈfɪɡə/", "con số; hình", "The <em>figure</em> for labor is too high."],
+["GW", "final", "/ˈfaɪnl/", "cuối cùng", "The <em>final</em> quantities are in the report."],
+["GW", "flexibility", "/ˌfleksəˈbɪləti/", "tính linh hoạt", "Float gives us <em>flexibility</em>."],
+["GW", "frequency", "/ˈfriːkwənsi/", "tần suất", "The <em>frequency</em> of updates is weekly."],
+["GW", "function", "/ˈfʌŋkʃn/", "chức năng", "The main <em>function</em> of the report is control."],
+["GW", "fundamental", "/ˌfʌndəˈmentl/", "cơ bản", "Planning is <em>fundamental</em> to project success."],
+["GW", "guidance", "/ˈɡaɪdns/", "sự hướng dẫn", "The new engineer needs <em>guidance</em>."],
+["GW", "identify", "/aɪˈdentɪfaɪ/", "xác định, nhận diện", "<em>Identify</em> the critical activities."],
+["GW", "identification", "/aɪˌdentɪfɪˈkeɪʃn/", "sự nhận diện", "Activity <em>identification</em> uses numbers."],
+["GW", "impact", "/ˈɪmpækt/", "tác động", "What is the <em>impact</em> on the completion date?"],
+["GW", "implement", "/ˈɪmplɪment/", "triển khai", "<em>Implement</em> the new cost codes next month."],
+["GW", "improve", "/ɪmˈpruːv/", "cải thiện", "We need to <em>improve</em> productivity on the deck."],
+["GW", "include", "/ɪnˈkluːd/", "bao gồm", "The price <em>includes</em> delivery."],
+["GW", "increase", "/ɪnˈkriːs/", "tăng", "The change will <em>increase</em> the cost."],
+["GW", "indicate", "/ˈɪndɪkeɪt/", "cho thấy", "The report <em>indicates</em> a delay."],
+["GW", "individual", "/ˌɪndɪˈvɪdʒuəl/", "riêng lẻ, từng", "Each <em>individual</em> activity has a duration."],
+["GW", "influence", "/ˈɪnfluəns/", "ảnh hưởng", "Weather has a strong <em>influence</em> on progress."],
+["GW", "information", "/ˌɪnfəˈmeɪʃn/", "thông tin", "We need more <em>information</em> about the soil."],
+["GW", "initial", "/ɪˈnɪʃl/", "ban đầu", "The <em>initial</em> plan had 60 activities."],
+["GW", "input", "/ˈɪnpʊt/", "đầu vào", "The foremen give <em>input</em> to the schedule."],
+["GW", "interval", "/ˈɪntəvl/", "khoảng (thời gian)", "Updates are done at regular <em>intervals</em>."],
+["GW", "involve", "/ɪnˈvɒlv/", "liên quan; bao gồm", "The work <em>involves</em> both concrete and steel."],
+["GW", "issue", "/ˈɪʃuː/", "vấn đề; ban hành", "The engineer will <em>issue</em> new drawings."],
+["GW", "judgment", "/ˈdʒʌdʒmənt/", "sự phán đoán", "Estimating requires good <em>judgment</em>."],
+["GW", "key", "/kiː/", "chủ chốt", "The <em>key</em> issue is the steel delivery."],
+["GW", "knowledge", "/ˈnɒlɪdʒ/", "kiến thức", "Field <em>knowledge</em> makes better plans."],
+["GW", "length", "/leŋθ/", "chiều dài; độ dài", "The <em>length</em> of the pour is 30 meters."],
+["GW", "limit", "/ˈlɪmɪt/", "giới hạn", "There is a <em>limit</em> to how many crews fit on the deck."],
+["GW", "limitation", "/ˌlɪmɪˈteɪʃn/", "hạn chế", "The main <em>limitation</em> is crane capacity."],
+["GW", "location", "/ləʊˈkeɪʃn/", "vị trí", "Mark the <em>location</em> of the pipeline."],
+["GW", "logical", "/ˈlɒdʒɪkl/", "hợp lý, logic", "Follow a <em>logical</em> order of work."],
+["GW", "maintain", "/meɪnˈteɪn/", "duy trì", "<em>Maintain</em> the haul road in good condition."],
+["GW", "major", "/ˈmeɪdʒə/", "chính, lớn", "The <em>major</em> risk is flooding."],
+["GW", "maximum", "/ˈmæksɪməm/", "tối đa", "The <em>maximum</em> crew size is eight."],
+["GW", "measure", "/ˈmeʒə/", "đo; biện pháp", "<em>Measure</em> the quantities every Friday."],
+["GW", "measurement", "/ˈmeʒəmənt/", "sự đo lường", "<em>Measurement</em> of earthwork is done by survey."],
+["GW", "method", "/ˈmeθəd/", "phương pháp", "Which <em>method</em> is cheaper?"],
+["GW", "minimize", "/ˈmɪnɪmaɪz/", "giảm thiểu", "<em>Minimize</em> idle time for the crane."],
+["GW", "minimum", "/ˈmɪnɪməm/", "tối thiểu", "The <em>minimum</em> curing time is seven days."],
+["GW", "necessary", "/ˈnesəsəri/", "cần thiết", "Is overtime <em>necessary</em> this week?"],
+["GW", "objective", "/əbˈdʒektɪv/", "mục tiêu", "Our <em>objective</em> is to finish before winter."],
+["GW", "obtain", "/əbˈteɪn/", "có được, thu được", "<em>Obtain</em> three quotes for the paint."],
+["GW", "occur", "/əˈkɜː/", "xảy ra", "Delays often <em>occur</em> in the first month."],
+["GW", "optimal", "/ˈɒptɪməl/", "tối ưu", "Find the <em>optimal</em> crew size."],
+["GW", "original", "/əˈrɪdʒənl/", "ban đầu, gốc", "The <em>original</em> plan had one crane."],
+["GW", "originally", "/əˈrɪdʒənəli/", "ban đầu", "The deck was <em>originally</em> planned for May."],
+["GW", "outline", "/ˈaʊtlaɪn/", "dàn ý; phác thảo", "<em>Outline</em> the plan before adding details."],
+["GW", "overall", "/ˌəʊvərˈɔːl/", "tổng thể", "The <em>overall</em> progress is 55%."],
+["GW", "particular", "/pəˈtɪkjələ/", "cụ thể, riêng", "This <em>particular</em> site has poor access."],
+["GW", "percentage", "/pəˈsentɪdʒ/", "tỷ lệ phần trăm", "What <em>percentage</em> of the work is done?"],
+["GW", "perform", "/pəˈfɔːm/", "thực hiện", "Who will <em>perform</em> the testing?"],
+["GW", "performance", "/pəˈfɔːməns/", "kết quả thực hiện", "Crew <em>performance</em> improved this week."],
+["GW", "period", "/ˈpɪəriəd/", "giai đoạn, kỳ", "The pay <em>period</em> ends on the 25th."],
+["GW", "periodic", "/ˌpɪəriˈɒdɪk/", "định kỳ", "<em>Periodic</em> reports keep the owner informed."],
+["GW", "portion", "/ˈpɔːʃn/", "phần", "A <em>portion</em> of the work was subcontracted."],
+["GW", "potential", "/pəˈtenʃl/", "tiềm năng; có thể xảy ra", "There is <em>potential</em> for flooding in October."],
+["GW", "practical", "/ˈpræktɪkl/", "thực tế, thiết thực", "We need a <em>practical</em> solution."],
+["GW", "precede", "/prɪˈsiːd/", "đi trước", "Excavation must <em>precede</em> the footing work."],
+["GW", "preliminary", "/prɪˈlɪmɪnəri/", "sơ bộ", "This is only a <em>preliminary</em> schedule."],
+["GW", "prepare", "/prɪˈpeə/", "chuẩn bị", "<em>Prepare</em> the forms for the next pour."],
+["GW", "preparation", "/ˌprepəˈreɪʃn/", "sự chuẩn bị", "<em>Preparation</em> of the bid took ten days."],
+["GW", "previous", "/ˈpriːviəs/", "trước đó", "The <em>previous</em> update showed no delay."],
+["GW", "principal", "/ˈprɪnsəpl/", "chính", "The <em>principal</em> cost is labor."],
+["GW", "prior to", "/ˈpraɪə tə/", "trước khi", "Submit the plan <em>prior to</em> starting work."],
+["GW", "process", "/ˈprəʊses/", "quá trình; xử lý", "We will <em>process</em> your request today."],
+["GW", "produce", "/prəˈdjuːs/", "sản xuất, tạo ra", "The plant can <em>produce</em> 50 cubic meters per hour."],
+["GW", "proposal", "/prəˈpəʊzl/", "đề xuất", "Send us a <em>proposal</em> for the extra work."],
+["GW", "proposed", "/prəˈpəʊzd/", "được đề xuất", "The <em>proposed</em> change saves two weeks."],
+["GW", "provide", "/prəˈvaɪd/", "cung cấp", "The owner will <em>provide</em> the power supply."],
+["GW", "provision", "/prəˈvɪʒn/", "điều khoản; sự cung cấp", "There is no <em>provision</em> for escalation."],
+["GW", "purpose", "/ˈpɜːpəs/", "mục đích", "The <em>purpose</em> of the meeting is to agree the plan."],
+["GW", "range", "/reɪndʒ/", "phạm vi, khoảng", "Bids were in the <em>range</em> of $2 to $2.4 million."],
+["GW", "rate", "/reɪt/", "tỷ lệ; đơn giá", "The <em>rate</em> of progress is too slow."],
+["GW", "realistic", "/ˌriːəˈlɪstɪk/", "thực tế, khả thi", "Is this date <em>realistic</em>?"],
+["GW", "reasonable", "/ˈriːznəbl/", "hợp lý", "The price is <em>reasonable</em> for this location."],
+["GW", "record", "/ˈrekɔːd/", "ghi chép; hồ sơ", "<em>Record</em> the weather every day."],
+["GW", "reduce", "/rɪˈdjuːs/", "giảm", "We must <em>reduce</em> the cost of formwork."],
+["GW", "reduction", "/rɪˈdʌkʃn/", "sự giảm", "A <em>reduction</em> in crew size saved money."],
+["GW", "reference", "/ˈrefrəns/", "tham chiếu", "Keep the specification for <em>reference</em>."],
+["GW", "regarding", "/rɪˈɡɑːdɪŋ/", "về, liên quan đến", "I have a question <em>regarding</em> the payment."],
+["GW", "regular", "/ˈreɡjələ/", "đều đặn, thường xuyên", "Hold <em>regular</em> safety meetings."],
+["GW", "relationship", "/rɪˈleɪʃnʃɪp/", "mối quan hệ", "The <em>relationship</em> between the two activities is finish-to-start."],
+["GW", "reliable", "/rɪˈlaɪəbl/", "đáng tin cậy", "We need a <em>reliable</em> supplier."],
+["GW", "remaining", "/rɪˈmeɪnɪŋ/", "còn lại", "The <em>remaining</em> work is mostly finishing."],
+["GW", "repetitive", "/rɪˈpetətɪv/", "lặp đi lặp lại", "<em>Repetitive</em> work suits a small crew."],
+["GW", "represent", "/ˌreprɪˈzent/", "đại diện; biểu thị", "Each arrow <em>represents</em> an activity."],
+["GW", "request", "/rɪˈkwest/", "yêu cầu", "Send a <em>request</em> for a time extension."],
+["GW", "require", "/rɪˈkwaɪə/", "yêu cầu, đòi hỏi", "The job will <em>require</em> two cranes."],
+["GW", "requirement", "/rɪˈkwaɪəmənt/", "yêu cầu", "What are the testing <em>requirements</em>?"],
+["GW", "responsible", "/rɪˈspɒnsəbl/", "chịu trách nhiệm", "Who is <em>responsible</em> for the haul road?"],
+["GW", "result", "/rɪˈzʌlt/", "kết quả", "The <em>result</em> of the test was acceptable."],
+["GW", "review", "/rɪˈvjuː/", "xem xét, rà soát", "<em>Review</em> the schedule with the foremen."],
+["GW", "revised", "/rɪˈvaɪzd/", "được sửa đổi", "The <em>revised</em> drawings arrived today."],
+["GW", "routine", "/ruːˈtiːn/", "thường lệ", "Weekly updates are <em>routine</em>."],
+["GW", "satisfactory", "/ˌsætɪsˈfæktəri/", "đạt yêu cầu", "The test results are <em>satisfactory</em>."],
+["GW", "segment", "/ˈseɡmənt/", "phân đoạn", "Each <em>segment</em> of the deck is poured separately."],
+["GW", "select", "/sɪˈlekt/", "lựa chọn", "<em>Select</em> the best subcontractor."],
+["GW", "selection", "/sɪˈlekʃn/", "sự lựa chọn", "The <em>selection</em> of equipment affects cost."],
+["GW", "separate", "/ˈseprət/", "riêng biệt", "Keep a <em>separate</em> account for extra work."],
+["GW", "significant", "/sɪɡˈnɪfɪkənt/", "đáng kể", "The change has a <em>significant</em> effect on cost."],
+["GW", "similar", "/ˈsɪmələ/", "tương tự", "We built a <em>similar</em> bridge last year."],
+["GW", "simultaneously", "/ˌsɪmlˈteɪniəsli/", "đồng thời", "Both abutments can be built <em>simultaneously</em>."],
+["GW", "situation", "/ˌsɪtʃuˈeɪʃn/", "tình huống", "The <em>situation</em> on site is under control."],
+["GW", "solution", "/səˈluːʃn/", "giải pháp", "We found a cheaper <em>solution</em>."],
+["GW", "source", "/sɔːs/", "nguồn", "What is the <em>source</em> of these production rates?"],
+["GW", "specific", "/spəˈsɪfɪk/", "cụ thể", "Give <em>specific</em> dates in the report."],
+["GW", "specified", "/ˈspesɪfaɪd/", "được quy định", "Use the <em>specified</em> concrete strength."],
+["GW", "standard", "/ˈstændəd/", "tiêu chuẩn", "Use <em>standard</em> forms where possible."],
+["GW", "step", "/step/", "bước", "The first <em>step</em> is to list the activities."],
+["GW", "subsequent", "/ˈsʌbsɪkwənt/", "tiếp theo", "<em>Subsequent</em> updates will be shorter."],
+["GW", "substantial", "/səbˈstænʃl/", "đáng kể", "There was <em>substantial</em> damage to the forms."],
+["GW", "sufficient", "/səˈfɪʃnt/", "đủ", "Is there <em>sufficient</em> space for the crane?"],
+["GW", "suitable", "/ˈsuːtəbl/", "phù hợp", "This soil is not <em>suitable</em> for backfill."],
+["GW", "summarize", "/ˈsʌməraɪz/", "tóm tắt", "<em>Summarize</em> the main issues for the owner."],
+["GW", "supervision", "/ˌsuːpəˈvɪʒn/", "sự giám sát", "The work was done under close <em>supervision</em>."],
+["GW", "supply", "/səˈplaɪ/", "cung cấp; nguồn cung", "The <em>supply</em> of cement is limited."],
+["GW", "support", "/səˈpɔːt/", "hỗ trợ; đỡ", "The shoring <em>supports</em> the deck forms."],
+["GW", "technique", "/tekˈniːk/", "kỹ thuật", "CPM is a planning <em>technique</em>."],
+["GW", "technical", "/ˈteknɪkl/", "thuộc kỹ thuật", "There was a <em>technical</em> problem with the pump."],
+["GW", "timely", "/ˈtaɪmli/", "kịp thời", "<em>Timely</em> information prevents mistakes."],
+["GW", "typical", "/ˈtɪpɪkl/", "điển hình", "A <em>typical</em> pour takes six hours."],
+["GW", "unique", "/juˈniːk/", "duy nhất, đặc thù", "Every construction project is <em>unique</em>."],
+["GW", "unusual", "/ʌnˈjuːʒuəl/", "bất thường", "<em>Unusual</em> weather caused the delay."],
+["GW", "update", "/ʌpˈdeɪt/", "cập nhật", "<em>Update</em> the schedule every Friday."],
+["GW", "valuable", "/ˈvæljuəbl/", "có giá trị", "Field experience is <em>valuable</em> in planning."],
+["GW", "value", "/ˈvæljuː/", "giá trị", "What is the <em>value</em> of the work done?"],
+["GW", "variable", "/ˈveəriəbl/", "biến số; thay đổi", "Productivity is highly <em>variable</em>."],
+["GW", "variation", "/ˌveəriˈeɪʃn/", "sự thay đổi, biến động", "There is a <em>variation</em> in daily output."],
+["GW", "volume", "/ˈvɒljuːm/", "khối lượng", "The <em>volume</em> of concrete is 300 cubic meters."],
+["GW", "weekly", "/ˈwiːkli/", "hằng tuần", "We hold a <em>weekly</em> coordination meeting."],
+["GW", "monthly", "/ˈmʌnθli/", "hằng tháng", "The <em>monthly</em> report is due on the 5th."],
+["GW", "daily", "/ˈdeɪli/", "hằng ngày", "The foreman makes <em>daily</em> notes."],
+["GW", "yield", "/jiːld/", "cho ra; sản lượng", "This method <em>yields</em> better results."],
+["GW", "zero", "/ˈzɪərəʊ/", "bằng không", "The float is <em>zero</em>."],
+["GW", "achieve", "/əˈtʃiːv/", "đạt được", "We <em>achieved</em> our time goal this week."],
+["GW", "acceptable", "/əkˈseptəbl/", "chấp nhận được", "A two-day delay is <em>acceptable</em>."],
+["GW", "accordance", "/əˈkɔːdns/", "sự phù hợp (in accordance with)", "Build in <em>accordance</em> with the drawings."],
+["GW", "additional", "/əˈdɪʃənl/", "bổ sung", "<em>Additional</em> piles are needed at the east abutment."],
+["GW", "advisable", "/ədˈvaɪzəbl/", "nên làm", "It is <em>advisable</em> to order early."],
+["GW", "allow", "/əˈlaʊ/", "cho phép", "The contract <em>allows</em> ten rain days."],
+["GW", "approach", "/əˈprəʊtʃ/", "cách tiếp cận", "We need a new <em>approach</em> to the pipeline work."],
+["GW", "arise", "/əˈraɪz/", "phát sinh", "Problems often <em>arise</em> at night."],
+["GW", "attempt", "/əˈtempt/", "cố gắng", "We will <em>attempt</em> to pour on Saturday."],
+["GW", "carefully", "/ˈkeəfəli/", "cẩn thận", "Check the levels <em>carefully</em>."],
+["GW", "commence", "/kəˈmens/", "bắt đầu", "Work will <em>commence</em> on March 3."],
+["GW", "complicated", "/ˈkɒmplɪkeɪtɪd/", "phức tạp", "The river crossing is <em>complicated</em>."],
+["GW", "concurrent", "/kənˈkʌrənt/", "đồng thời", "<em>Concurrent</em> delays are hard to analyze."],
+["GW", "constitute", "/ˈkɒnstɪtjuːt/", "cấu thành", "Labor costs <em>constitute</em> 40% of the total."],
+["GW", "continuously", "/kənˈtɪnjuəsli/", "liên tục", "Monitor the water level <em>continuously</em>."],
+["GW", "critical", "/ˈkrɪtɪkl/", "then chốt; găng", "This activity is <em>critical</em>."],
+["GW", "efficiency", "/ɪˈfɪʃnsi/", "hiệu suất", "Crew <em>efficiency</em> dropped after ten hours."],
+["GW", "emergency", "/ɪˈmɜːdʒənsi/", "khẩn cấp", "Call this number in an <em>emergency</em>."],
+["GW", "exception", "/ɪkˈsepʃn/", "ngoại lệ", "Report only the <em>exceptions</em>."],
+["GW", "expenditure", "/ɪkˈspendɪtʃə/", "khoản chi tiêu", "Total <em>expenditure</em> this month was $300,000."],
+["GW", "generate", "/ˈdʒenəreɪt/", "tạo ra", "The software can <em>generate</em> reports automatically."],
+["GW", "hence", "/hens/", "vì vậy", "<em>Hence</em>, the pour was postponed."],
+["GW", "intermediate", "/ˌɪntəˈmiːdiət/", "trung gian", "Set <em>intermediate</em> milestones every month."],
+["GW", "nevertheless", "/ˌnevəðəˈles/", "tuy nhiên", "It rained; <em>nevertheless</em>, the crew finished the forms."],
+["GW", "obvious", "/ˈɒbviəs/", "rõ ràng", "The <em>obvious</em> solution is a second crane."],
+["GW", "occasionally", "/əˈkeɪʒnəli/", "thỉnh thoảng", "The supplier <em>occasionally</em> delivers late."],
+["GW", "proceed", "/prəˈsiːd/", "tiến hành", "You may <em>proceed</em> with the excavation."],
+["GW", "shortage", "/ˈʃɔːtɪdʒ/", "sự thiếu hụt", "There is a <em>shortage</em> of skilled carpenters."],
+["GW", "significance", "/sɪɡˈnɪfɪkəns/", "tầm quan trọng", "Explain the <em>significance</em> of the float."],
+["GW", "thoroughly", "/ˈθʌrəli/", "kỹ lưỡng", "Clean the forms <em>thoroughly</em>."],
+["GW", "utilize", "/ˈjuːtəlaɪz/", "sử dụng", "<em>Utilize</em> the crane fully while it is on site."],
+["SP", "highway bridge", "/ˈhaɪweɪ brɪdʒ/", "cầu đường bộ", "The <em>highway bridge</em> has two spans."],
+["CF", "project cost", "/ˈprɒdʒekt kɒst/", "chi phí dự án", "The <em>project cost</em> is checked every week."],
+["PS", "project time", "/ˈprɒdʒekt taɪm/", "thời gian dự án", "<em>Project time</em> is set by the critical path."],
+["PS", "construction period", "/kənˈstrʌkʃn ˈpɪəriəd/", "thời gian thi công", "The <em>construction period</em> is ten weeks."],
+["GC", "construction project", "/kənˈstrʌkʃn ˈprɒdʒekt/", "dự án xây dựng", "Every <em>construction project</em> is different."],
+["SP", "abutment forms", "/əˈbʌtmənt fɔːmz/", "cốp pha mố cầu", "The <em>abutment forms</em> are reused on the second side."],
+["CF", "cost system", "/kɒst ˈsɪstəm/", "hệ thống chi phí", "The <em>cost system</em> shows where money is lost."],
+["SP", "relocation", "/ˌriːləʊˈkeɪʃn/", "sự di dời", "The <em>relocation</em> of the gas line took two weeks."],
+["RA", "manpower", "/ˈmænpaʊə/", "nhân lực", "We do not have enough <em>manpower</em> for two shifts."],
+["MS", "software", "/ˈsɒftweə/", "phần mềm", "The <em>software</em> prints the bar chart automatically."],
+["SP", "maintenance", "/ˈmeɪntənəns/", "bảo dưỡng", "<em>Maintenance</em> of the crane is done every 250 hours."],
+["SP", "shop", "/ʃɒp/", "xưởng", "The forms are built in the <em>shop</em>."],
+["MS", "program", "/ˈprəʊɡræm/", "chương trình", "The safety <em>program</em> covers every worker."],
+["GC", "dam", "/dæm/", "đập", "The earth <em>dam</em> needs a large fleet of trucks."],
+["SP", "bearing", "/ˈbeərɪŋ/", "gối cầu", "Each girder sits on a steel <em>bearing</em>."],
+["SP", "painting", "/ˈpeɪntɪŋ/", "sơn", "<em>Painting</em> of the guardrail is the last activity."],
+["SP", "gas pipeline", "/ɡæs ˈpaɪplaɪn/", "đường ống dẫn khí", "The <em>gas pipeline</em> must be moved before excavation."],
+["SP", "deliver", "/dɪˈlɪvə/", "giao (hàng)", "The supplier will <em>deliver</em> the piles on Monday."],
+["SP", "delivery", "/dɪˈlɪvəri/", "việc giao hàng", "The <em>delivery</em> was two days late."],
+["SP", "purchase", "/ˈpɜːtʃəs/", "mua", "<em>Purchase</em> the anchor bolts this week."],
+["GC", "bond", "/bɒnd/", "bảo lãnh", "The <em>bond</em> must be issued before the contract is signed."],
+["CF", "income", "/ˈɪnkʌm/", "thu nhập; khoản thu", "<em>Income</em> from the job starts in month two."],
+["GC", "phase", "/feɪz/", "giai đoạn", "The second <em>phase</em> includes the approach roads."],
+["GC", "stage", "/steɪdʒ/", "giai đoạn", "At this <em>stage</em>, the design is 60% complete."],
+["SP", "demobilize", "/diːˈməʊbəlaɪz/", "rút quân, rút máy", "<em>Demobilize</em> the rig after the last pile."],
+["SP", "mobilize", "/ˈməʊbəlaɪz/", "huy động", "We will <em>mobilize</em> the crane next Monday."],
+["TC", "curve", "/kɜːv/", "đường cong", "The cost <em>curve</em> is above the plan."],
+["MS", "manual", "/ˈmænjuəl/", "thủ công; sổ tay", "The <em>manual</em> method is slow for large networks."],
+["MS", "computer", "/kəmˈpjuːtə/", "máy tính", "The <em>computer</em> recalculates the schedule in seconds."],
+["GC", "services", "/ˈsɜːvɪsɪz/", "dịch vụ", "The engineer provides design <em>services</em>."],
+["GC", "industry", "/ˈɪndəstri/", "ngành", "The <em>industry</em> is short of skilled workers."],
+["SP", "worker", "/ˈwɜːkə/", "công nhân", "Every <em>worker</em> must attend the safety briefing."],
+["PS", "chart", "/tʃɑːt/", "biểu đồ", "Put the <em>chart</em> on the site office wall."],
+["PS", "calendar", "/ˈkælɪndə/", "lịch", "Use a five-day <em>calendar</em> for the crews."],
+["PS", "notation", "/nəʊˈteɪʃn/", "ký hiệu", "Both <em>notations</em> give the same critical path."],
+["GC", "drawings", "/ˈdrɔːɪŋz/", "bản vẽ", "The <em>drawings</em> show 16 piles per abutment."],
+["GC", "practice", "/ˈpræktɪs/", "thông lệ; thực tiễn", "In <em>practice</em>, durations are estimated by the foremen."],
+["MS", "office", "/ˈɒfɪs/", "văn phòng", "Send the time cards to the <em>office</em>."],
+["MS", "team", "/tiːm/", "nhóm", "The <em>team</em> agreed on the new logic."],
+["GC", "bidding", "/ˈbɪdɪŋ/", "đấu thầu", "<em>Bidding</em> closes at noon on Friday."],
+["GC", "contract", "/ˈkɒntrækt/", "hợp đồng", "Read the <em>contract</em> before you price the job."],
+["GC", "contractor", "/kənˈtræktə/", "nhà thầu", "The <em>contractor</em> submitted the schedule on time."],
+["TC", "report", "/rɪˈpɔːt/", "báo cáo", "The <em>report</em> shows a two-day delay."],
+["PS", "logic", "/ˈlɒdʒɪk/", "logic (trình tự)", "The <em>logic</em> must reflect how the crews really work."],
+["PS", "path", "/pɑːθ/", "đường (trong sơ đồ mạng)", "This <em>path</em> has five days of float."],
+["PS", "diagram", "/ˈdaɪəɡræm/", "sơ đồ", "Draw the <em>diagram</em> before entering it in the computer."],
+["SP", "production", "/prəˈdʌkʃn/", "sản xuất; năng suất", "<em>Production</em> on the deck was good today."],
+["SP", "material", "/məˈtɪəriəl/", "vật liệu", "The <em>material</em> arrived damaged."],
+["SP", "equipment", "/ɪˈkwɪpmənt/", "máy móc, thiết bị", "<em>Equipment</em> is a major cost on highway jobs."],
+["ES", "labor", "/ˈleɪbə/", "nhân công", "<em>Labor</em> is the most variable cost."],
+["MS", "field", "/fiːld/", "hiện trường", "The <em>field</em> reports problems to the office."],
+["SP", "site", "/saɪt/", "công trường", "The <em>site</em> is closed on Sunday."],
+["GC", "design", "/dɪˈzaɪn/", "thiết kế", "The <em>design</em> was changed after the soil tests."],
+["SP", "strip", "/strɪp/", "tháo (cốp pha)", "<em>Strip</em> the footing forms tomorrow."],
+["SP", "steel", "/stiːl/", "thép", "The <em>steel</em> for the deck is on site."],
+["SP", "order", "/ˈɔːdə/", "đặt hàng", "<em>Order</em> the rebar today."],
+["GC", "change", "/tʃeɪndʒ/", "thay đổi", "Any <em>change</em> must be approved in writing."],
+["PS", "completion", "/kəmˈpliːʃn/", "sự hoàn thành", "<em>Completion</em> is planned for October."],
+["SP", "concrete deck", "/ˈkɒŋkriːt dek/", "bản mặt cầu bê tông", "The <em>concrete deck</em> is poured in one day."],
+["SP", "steel girders", "/stiːl ˈɡɜːdəz/", "dầm thép", "The <em>steel girders</em> arrive on two trucks."],
+["PS", "construction schedule", "/kənˈstrʌkʃn ˈʃedjuːl/", "tiến độ thi công", "The <em>construction schedule</em> is part of the contract."],
+["PS", "construction plan", "/kənˈstrʌkʃn plæn/", "kế hoạch thi công", "The <em>construction plan</em> was reviewed by the owner."],
+["SP", "job conditions", "/dʒɒb kənˈdɪʃnz/", "điều kiện công trường", "<em>Job conditions</em> were worse than expected."],
+["SP", "field mobilization", "/fiːld ˌməʊbəlaɪˈzeɪʃn/", "huy động ra hiện trường", "<em>Field mobilization</em> takes one week."]
+].map((r,i)=>({id:i,ph:r[0],en:r[1],ipa:r[2],vi:r[3],ex:r[4]}));
+
+const PHR=[
+["Mở họp",[["Let's get started. The purpose of today's meeting is to review progress.","Bắt đầu nhé. Mục đích buổi họp hôm nay là rà soát tiến độ."],["We have three items on the agenda.","Chúng ta có ba nội dung trong chương trình họp."],["Can we keep this to thirty minutes?","Mình giữ buổi họp trong 30 phút được không?"]]],
+["Báo cáo tiến độ",[["We are on track for the March milestone.","Chúng ta đang đúng tiến độ cho mốc tháng Ba."],["We're about two weeks behind schedule because of the rain.","Chúng ta chậm khoảng hai tuần do mưa."],["Overall, we've completed 65% of the structural works.","Nhìn chung, đã hoàn thành 65% phần kết cấu."]]],
+["Nêu vấn đề, rủi ro",[["I'd like to flag a risk on the steel delivery.","Tôi muốn lưu ý một rủi ro về việc giao thép."],["If this isn't resolved by Friday, it will affect the critical path.","Nếu đến thứ Sáu chưa xử lý, đường găng sẽ bị ảnh hưởng."],["What's the impact on cost and time?","Ảnh hưởng tới chi phí và thời gian là bao nhiêu?"]]],
+["Đề nghị, giao việc",[["Could you send me the updated schedule by Wednesday?","Anh gửi tôi tiến độ cập nhật trước thứ Tư được không?"],["Who will take ownership of this?","Ai sẽ chịu trách nhiệm việc này?"],["Let's set a deadline for the RFI response.","Mình đặt hạn trả lời RFI nhé."]]],
+["Phản biện lịch sự",[["I see your point, but I have a concern about the budget.","Tôi hiểu ý anh, nhưng tôi lo về ngân sách."],["Could we look at an alternative?","Mình xem xét phương án khác được không?"],["I'm not sure that's realistic given the lead time.","Tôi chưa chắc điều đó khả thi với thời gian chờ hàng."]]],
+["Chốt họp",[["To sum up, we agreed on three actions.","Tóm lại, chúng ta thống nhất ba việc."],["I'll circulate the minutes this afternoon.","Chiều nay tôi sẽ gửi biên bản họp."],["Let's meet again next Monday to follow up.","Thứ Hai tới mình họp lại để theo dõi tiếp."]]],
+["Họp lập kế hoạch và tiến độ", [["Let's break the job down into its main segments first.", "Trước hết, mình chia công trình thành các phân đoạn chính."], ["What has to be finished before this activity can start?", "Việc gì phải xong trước khi công việc này bắt đầu được?"], ["How many working days do you need for the footing?", "Anh cần bao nhiêu ngày làm việc cho phần móng?"], ["Is that duration based on one crew or two?", "Thời gian đó tính cho một tổ đội hay hai?"], ["These two activities can run in parallel.", "Hai công việc này có thể làm song song."], ["We need a two-day lag after the pour for curing.", "Sau khi đổ cần chờ hai ngày để bảo dưỡng."], ["Which activities are on the critical path?", "Những công việc nào nằm trên đường găng?"], ["This activity has six days of float, so it isn't urgent.", "Việc này còn sáu ngày dự trữ, nên chưa gấp."], ["Please check the logic before we run the schedule.", "Anh kiểm tra lại logic trước khi mình chạy tiến độ."], ["Let's agree on the baseline schedule today.", "Hôm nay mình chốt tiến độ cơ sở nhé."]]],
+["Báo cáo tiến độ và chậm trễ", [["The footing is 80 percent complete.", "Phần móng đã hoàn thành 80%."], ["We finished the deck forms one day early.", "Chúng tôi làm xong cốp pha mặt cầu sớm một ngày."], ["The pour slipped two days because of the rain.", "Đợt đổ bê tông bị lùi hai ngày do mưa."], ["This delay is now on the critical path.", "Sự chậm trễ này giờ đã nằm trên đường găng."], ["We've used up all the float on the pipeline work.", "Phần đường ống đã dùng hết thời gian dự trữ."], ["The updated schedule shows completion on October 20.", "Tiến độ cập nhật cho thấy hoàn thành vào ngày 20/10."], ["What is the remaining duration of this activity?", "Công việc này còn bao nhiêu ngày nữa?"], ["Please record the actual start and finish dates.", "Vui lòng ghi lại ngày bắt đầu và kết thúc thực tế."], ["We can recover the time if we work on Saturday.", "Nếu làm thêm thứ Bảy thì mình lấy lại được thời gian."], ["The steel delivery is the main cause of the delay.", "Giao thép trễ là nguyên nhân chính gây chậm."]]],
+["Dự toán và đấu thầu", [["When is the bid due?", "Hạn nộp thầu là khi nào?"], ["Have we visited the site before pricing the work?", "Mình đã đi khảo sát hiện trường trước khi tính giá chưa?"], ["The quantity takeoff is based on the latest drawings.", "Bóc khối lượng dựa trên bộ bản vẽ mới nhất."], ["What production rate did you assume for the crew?", "Anh giả định năng suất tổ đội là bao nhiêu?"], ["Our labor unit cost seems too low for this kind of work.", "Đơn giá nhân công của mình có vẻ quá thấp cho loại việc này."], ["Please get at least three quotations for the guardrail.", "Vui lòng lấy ít nhất ba báo giá cho lan can."], ["Does the subcontractor's price include delivery?", "Giá của nhà thầu phụ đã gồm vận chuyển chưa?"], ["We should add a contingency for bad weather.", "Mình nên thêm khoản dự phòng cho thời tiết xấu."], ["What markup are we using on this bid?", "Gói thầu này mình cộng tỷ lệ lãi bao nhiêu?"], ["Let's compare our price with the engineer's estimate.", "Mình so giá của mình với dự toán của tư vấn."]]],
+["Chi phí và ngân sách", [["We are 5% over budget on the formwork.", "Phần cốp pha đang vượt ngân sách 5%."], ["Which cost code should I charge these hours to?", "Tôi nên hạch toán số giờ này vào mã chi phí nào?"], ["The actual unit cost is higher than the estimate.", "Đơn giá thực tế cao hơn dự toán."], ["What is the cost to complete the abutments?", "Chi phí để hoàn thành các mố cầu là bao nhiêu?"], ["The cost forecast shows a small loss on the job.", "Dự báo chi phí cho thấy công trình lỗ nhẹ."], ["Overtime is pushing up our labor cost.", "Làm thêm giờ đang đẩy chi phí nhân công lên."], ["Can we find savings in the equipment rental?", "Mình có tiết kiệm được ở khoản thuê máy không?"], ["Please explain any variance larger than 10%.", "Vui lòng giải trình mọi chênh lệch trên 10%."], ["Earned value is behind planned value this month.", "Tháng này giá trị thu được thấp hơn giá trị kế hoạch."], ["Keep the extra work in a separate cost account.", "Hãy để phần việc phát sinh vào một tài khoản chi phí riêng."]]],
+["Thanh toán và dòng tiền", [["We will submit the monthly pay request on the 25th.", "Chúng tôi sẽ nộp đề nghị thanh toán tháng vào ngày 25."], ["Can we include the materials stored on-site?", "Mình có được tính vật tư đang lưu tại công trường không?"], ["The owner is holding 10% retainage.", "Chủ đầu tư đang giữ lại 10%."], ["When will the retainage be released?", "Khi nào tiền giữ lại được hoàn trả?"], ["The last payment is three weeks late.", "Đợt thanh toán gần nhất đã chậm ba tuần."], ["Our cash flow will be negative until month three.", "Dòng tiền của mình sẽ âm cho đến tháng thứ ba."], ["We need to pay the suppliers before the end of the month.", "Mình cần trả nhà cung cấp trước cuối tháng."], ["Please send the invoice with the delivery tickets.", "Vui lòng gửi hóa đơn kèm phiếu giao hàng."], ["The measured quantities don't match the pay request.", "Khối lượng đo đạc không khớp với đề nghị thanh toán."], ["Final payment depends on the final inspection.", "Thanh toán lần cuối phụ thuộc vào đợt nghiệm thu cuối."]]],
+["Công trường và an toàn", [["Everyone must wear a hard hat and safety boots on site.", "Mọi người phải đội mũ bảo hộ và đi giày bảo hộ ở công trường."], ["Today's toolbox talk is about working near the crane.", "Buổi nhắc an toàn hôm nay về làm việc gần cần trục."], ["Please keep the haul road clear for the trucks.", "Vui lòng giữ đường công vụ thông thoáng cho xe tải."], ["Where should we store the girders?", "Mình nên để dầm ở đâu?"], ["Stop work immediately if you see an unsafe condition.", "Dừng việc ngay nếu thấy điều kiện không an toàn."], ["Report every accident, even a small one.", "Báo cáo mọi tai nạn, kể cả nhỏ."], ["The excavation needs a barrier before tonight.", "Hố đào cần có rào chắn trước tối nay."], ["Who is the first aider on this shift?", "Ai là người sơ cứu của ca này?"], ["Clean up the deck before the inspector arrives.", "Dọn sạch mặt cầu trước khi giám sát tới."], ["The site will be closed on Sunday.", "Công trường nghỉ vào Chủ nhật."]]],
+["Vật tư, máy móc và nhà thầu phụ", [["When can you deliver the rebar?", "Khi nào anh giao được cốt thép?"], ["The bearing plates have a six-week lead time.", "Bản gối có thời gian chờ hàng sáu tuần."], ["Please issue the purchase order today.", "Vui lòng phát hành đơn đặt hàng hôm nay."], ["Can you confirm the delivery date in writing?", "Anh xác nhận ngày giao hàng bằng văn bản được không?"], ["We need the crane for three days next week.", "Tuần sau mình cần cần trục trong ba ngày."], ["The pile-driving rig broke down this morning.", "Giàn đóng cọc bị hỏng sáng nay."], ["How long will the repair take?", "Sửa mất bao lâu?"], ["The subcontractor is short of workers this week.", "Tuần này nhà thầu phụ thiếu người."], ["Please send your crew on Monday as agreed.", "Vui lòng đưa tổ đội tới vào thứ Hai như đã thống nhất."], ["We rejected two loads of concrete this morning.", "Sáng nay chúng tôi đã trả lại hai xe bê tông."]]],
+["Thay đổi, khiếu nại và hợp đồng", [["This work is outside the scope of the contract.", "Việc này nằm ngoài phạm vi hợp đồng."], ["We need a written change order before we start.", "Chúng tôi cần lệnh thay đổi bằng văn bản trước khi làm."], ["The site conditions are different from the drawings.", "Điều kiện hiện trường khác với bản vẽ."], ["We are giving formal notice of delay.", "Chúng tôi chính thức thông báo về sự chậm trễ."], ["We will request a time extension of ten days.", "Chúng tôi sẽ đề nghị gia hạn mười ngày."], ["Who will pay for the extra work?", "Ai sẽ trả tiền cho phần việc phát sinh?"], ["Please price this change using the contract unit prices.", "Vui lòng tính giá thay đổi này theo đơn giá hợp đồng."], ["Let's try to settle this before it becomes a claim.", "Mình cố giải quyết việc này trước khi nó thành khiếu nại."], ["Liquidated damages start after the contract completion date.", "Tiền phạt chậm tiến độ bắt đầu tính sau ngày hoàn thành theo hợp đồng."], ["Please keep a record of every instruction from the owner.", "Vui lòng lưu lại mọi chỉ dẫn của chủ đầu tư."]]],
+["Đẩy nhanh và nguồn lực", [["How much will it cost to finish one week earlier?", "Hoàn thành sớm một tuần thì tốn thêm bao nhiêu?"], ["Let's shorten the cheapest critical activity first.", "Mình rút ngắn công việc găng rẻ nhất trước."], ["Can we bring in a second crew?", "Mình có thể đưa thêm tổ đội thứ hai không?"], ["Working two shifts will save about four days.", "Làm hai ca sẽ tiết kiệm khoảng bốn ngày."], ["Too much overtime will reduce productivity.", "Làm thêm giờ quá nhiều sẽ giảm năng suất."], ["We have only one crane, so the two activities can't overlap.", "Mình chỉ có một cần trục nên hai việc này không chồng nhau được."], ["Let's level the labor so the crew size stays steady.", "Mình cân bằng nhân công để quy mô tổ đội ổn định."], ["We need eight more carpenters in week five.", "Tuần thứ năm mình cần thêm tám thợ cốp pha."], ["Move the noncritical work to free up the crew.", "Dời các việc không găng để giải phóng tổ đội."], ["Is the extra cost worth the time we save?", "Chi phí thêm có đáng với thời gian tiết kiệm được không?"]]],
+["Chất lượng và nghiệm thu", [["The rebar inspection is at 9 a.m. tomorrow.", "Nghiệm thu cốt thép lúc 9 giờ sáng mai."], ["Please check the forms before we pour.", "Vui lòng kiểm tra cốp pha trước khi đổ."], ["The test results meet the specifications.", "Kết quả thí nghiệm đạt chỉ dẫn kỹ thuật."], ["This section must be removed and rebuilt.", "Đoạn này phải phá đi làm lại."], ["Who will pay for the rework?", "Ai chịu chi phí làm lại?"], ["Take six test cylinders from each truck.", "Lấy sáu mẫu trụ thí nghiệm từ mỗi xe."], ["The shop drawings are still waiting for approval.", "Bản vẽ chế tạo vẫn đang chờ phê duyệt."], ["Please send the as-built schedule with the final report.", "Vui lòng gửi tiến độ thực tế kèm báo cáo cuối cùng."], ["We are ready for the final inspection.", "Chúng tôi đã sẵn sàng cho đợt nghiệm thu cuối."], ["Let's walk the site and make a list of defects.", "Mình đi một vòng công trường và lập danh sách lỗi."]]]
+];
+
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let known=new Set(store.get("pm-known",[]));
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* Custom content */
+const BASE=V.length, MYG="Câu của tôi";
+let mine=store.get("pm-mine",{words:[],phrases:[]});
+if(!mine||typeof mine!=="object")mine={words:[],phrases:[]};
+if(!Array.isArray(mine.words))mine.words=[];
+if(!Array.isArray(mine.phrases))mine.phrases=[];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function mkWord(w){
+  const en=esc(String(w.en).trim());let ex=esc(String(w.ex||"").trim());
+  if(ex&&en){const re=new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i");ex=ex.replace(re,m=>`<em>${m}</em>`)}
+  const ph=LEGACY[w.ph]||w.ph;
+  return {id:w.id,ph:PHASES[ph]?ph:"GW",en,ipa:esc(w.ipa),vi:esc(w.vi),ex,mine:true};
+}
+function applyMine(){V.splice(BASE);mine.words.forEach(w=>V.push(mkWord(w)))}
+function saveMine(){store.set("pm-mine",mine);applyMine();drawGantt();buildDeck();renderGloss();renderPhrases();renderMine();quiz.started=false}
+function renderMine(){
+  const n=mine.words.length+mine.phrases.length;
+  $("#mineTitle").textContent=n?`Đã thêm (${n})`:"Đã thêm";
+  const w=mine.words.map(x=>`<div class="mine-item"><p><b>${esc(x.en)}</b> · ${esc(x.vi)}<small>Từ · ${PHASES[x.ph]||""}</small></p><button class="chip" type="button" data-del="w:${esc(x.id)}">Xóa</button></div>`);
+  const p=mine.phrases.map(x=>`<div class="mine-item"><p><b>${esc(x.en)}</b><small>Câu · ${esc(x.g)}${x.vi?" · "+esc(x.vi):""}</small></p><button class="chip" type="button" data-del="p:${esc(x.id)}">Xóa</button></div>`);
+  $("#mine").innerHTML=n?w.concat(p).join(""):`<p class="note">Chưa có mục nào. Từ và câu bạn thêm sẽ hiện ở đây và trong các phần học.</p>`;
+  $("#mine").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const [k,id]=b.dataset.del.split(":");
+    if(k==="w"){mine.words=mine.words.filter(x=>x.id!==id);known.delete(id);store.set("pm-known",[...known])}
+    else mine.phrases=mine.phrases.filter(x=>x.id!==id);
+    saveMine();toast("Đã xóa.");
+  });
+}
+function renderAdd(){
+  $("#wPh").innerHTML=Object.keys(PHASES).map(p=>`<option value="${p}"${p==="GW"?" selected":""}>${PHASES[p]}</option>`).join("");
+  $("#pG").innerHTML=[MYG,...PHR.map(g=>g[0])].map(g=>`<option>${esc(g)}</option>`).join("");
+  $("#fWord").onsubmit=e=>{e.preventDefault();
+    const en=$("#wEn").value.trim(),vi=$("#wVi").value.trim();
+    if(!en||!vi){toast("Cần nhập thuật ngữ tiếng Anh và nghĩa tiếng Việt.");return}
+    if(V.some(v=>v.en.toLowerCase()===esc(en).toLowerCase())){toast(`"${en}" đã có trong danh sách.`);return}
+    mine.words.push({id:"w"+Date.now(),ph:$("#wPh").value,en,vi,ipa:$("#wIpa").value.trim(),ex:$("#wEx").value.trim()});
+    saveMine();["wEn","wVi","wIpa","wEx"].forEach(i=>$("#"+i).value="");$("#wEn").focus();toast(`Đã thêm "${en}".`);
+  };
+  $("#fPhr").onsubmit=e=>{e.preventDefault();
+    const en=$("#pEn").value.trim(),vi=$("#pVi").value.trim();
+    if(!en){toast("Cần nhập câu tiếng Anh.");return}
+    mine.phrases.push({id:"p"+Date.now(),g:$("#pG").value,en,vi});
+    saveMine();$("#pEn").value="";$("#pVi").value="";$("#pEn").focus();toast("Đã thêm câu.");
+  };
+  $("#copyData").onclick=async()=>{
+    const s=JSON.stringify(mine),ta=$("#dataBox");ta.value=s;
+    try{await navigator.clipboard.writeText(s);toast("Đã sao chép. Dán vào app trên máy kia rồi bấm Nhập.")}
+    catch(e){ta.focus();ta.select();toast("Dữ liệu đã hiện trong ô, hãy chọn và sao chép.")}
+  };
+  $("#importData").onclick=()=>{
+    let d;try{d=JSON.parse($("#dataBox").value)}catch(e){toast("Dữ liệu không hợp lệ. Hãy dán đúng đoạn đã sao chép.");return}
+    const ids=new Set(mine.words.concat(mine.phrases).map(x=>x.id));let n=0;
+    (Array.isArray(d.words)?d.words:[]).forEach(w=>{if(w&&w.id&&w.en&&w.vi&&!ids.has(w.id)){mine.words.push(w);n++}});
+    (Array.isArray(d.phrases)?d.phrases:[]).forEach(p=>{if(p&&p.id&&p.en&&!ids.has(p.id)){mine.phrases.push({id:p.id,g:p.g||MYG,en:p.en,vi:p.vi||""});n++}});
+    saveMine();$("#dataBox").value="";toast(n?`Đã nhập ${n} mục.`:"Không có mục mới để nhập.");
+  };
+  renderMine();
+}
+
+let enVoice=null;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();enVoice=vs.find(v=>v.lang==="en-GB")||vs.find(v=>v.lang==="en-US")||vs.find(v=>/^en/i.test(v.lang))||null}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+function toast(msg){let t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.setAttribute("role","status");t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 32px);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;z-index:20";document.body.appendChild(t)}t.textContent=msg;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>t.hidden=true,4000)}
+function speak(t){
+  const d0=document.createElement("div");d0.innerHTML=t;const text=d0.textContent;
+  if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"){toast("Trình duyệt này không hỗ trợ đọc giọng. Hãy mở file bằng Chrome, Safari hoặc Edge.");return}
+  try{
+    const u=new SpeechSynthesisUtterance(text);
+    if(!enVoice)pickVoice();
+    if(enVoice){u.voice=enVoice;u.lang=enVoice.lang}else u.lang="en-US";
+    u.rate=.9;
+    let started=false;u.onstart=()=>started=true;
+    u.onerror=e=>{if(e.error!=="interrupted"&&e.error!=="canceled")toast("Không phát được âm thanh ("+e.error+"). Kiểm tra âm lượng hoặc chế độ im lặng.")};
+    const go=()=>{speechSynthesis.resume();speechSynthesis.speak(u)};
+    if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,120)}else go();
+    setTimeout(()=>{if(!started&&!speechSynthesis.speaking)toast(speechSynthesis.getVoices().length?"Chưa phát được. Kiểm tra âm lượng hoặc tắt chế độ im lặng.":"Máy chưa có giọng đọc tiếng Anh, hoặc khung xem này chặn âm thanh. Hãy mở file bằng trình duyệt.")},1500);
+  }catch(e){toast("Không phát được âm thanh trong khung xem này. Hãy mở file bằng trình duyệt.")}
+}
+
+function drawGantt(){
+  $("#gantt").innerHTML=Object.keys(PHASES).map(p=>{
+    const all=V.filter(v=>v.ph===p),k=all.filter(v=>known.has(v.id)).length,pct=Math.round(k/all.length*100);
+    return `<div class="gantt-row"><span>${PHASES[p].split(" · ")[0]}</span><div class="track"><i style="width:${pct}%"></i></div><b>${k}/${all.length}</b></div>`}).join("");
+}
+
+/* Tabs */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".pane").forEach(p=>p.hidden=p.id!==b.dataset.tab);
+  if(b.dataset.tab==="quiz"&&!quiz.started)startQuiz();
+});
+
+/* Flashcards */
+let phase="all",deck=[],pos=0,flipped=false;
+function buildChips(){
+  const opts=[["all","Tất cả"],...Object.keys(PHASES).map(p=>[p,PHASES[p].split(" · ")[1]]),["new","Chưa nhớ"]];
+  $("#phaseChips").innerHTML=opts.map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${k===phase}">${l}</button>`).join("");
+  $("#phaseChips").querySelectorAll("button").forEach(b=>b.onclick=()=>{phase=b.dataset.k;buildChips();buildDeck()});
+}
+function buildDeck(){
+  deck=shuffle(V.filter(v=>phase==="all"||v.ph===phase||(phase==="new"&&!known.has(v.id))));pos=0;flipped=false;showCard();
+}
+function showCard(){
+  const c=$("#card");
+  if(!deck.length){c.innerHTML=`<p class="empty">Bạn đã nhớ hết các thẻ trong nhóm này. Chọn nhóm khác hoặc đặt lại tiến độ.</p>`;$("#cardMeta").textContent="";return}
+  const v=deck[pos];
+  c.innerHTML=`<span class="phase">${PHASES[v.ph]}${known.has(v.id)?" · đã nhớ":""}${v.mine?" · của bạn":""}</span><p class="term">${v.en}</p><span class="ipa">${v.ipa}</span>`+
+    (flipped?`<span class="vn">${v.vi}</span>${v.ex?`<p class="ex">${v.ex}</p>`:""}`:`<span class="hint">Chạm để xem nghĩa và ví dụ</span>`);
+  $("#cardMeta").textContent=`Thẻ ${pos+1}/${deck.length} · đã nhớ ${known.size}/${V.length}`;
+}
+function next(){pos=(pos+1)%Math.max(deck.length,1);flipped=false;showCard()}
+$("#card").onclick=()=>{flipped=!flipped;showCard()};
+$("#card").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flipped=!flipped;showCard()}};
+$("#known").onclick=()=>{if(!deck.length)return;known.add(deck[pos].id);store.set("pm-known",[...known]);drawGantt();
+  if(phase==="new"){deck.splice(pos,1);if(pos>=deck.length)pos=0;flipped=false;showCard()}else next()};
+$("#again").onclick=()=>{if(!deck.length)return;known.delete(deck[pos].id);store.set("pm-known",[...known]);drawGantt();next()};
+$("#speak").onclick=()=>{if(deck.length)speak(flipped&&deck[pos].ex?deck[pos].ex:deck[pos].en)};
+let resetArmed=false;
+$("#reset").onclick=e=>{if(!resetArmed){resetArmed=true;e.target.textContent="Bấm lần nữa để xác nhận";setTimeout(()=>{resetArmed=false;e.target.textContent="Đặt lại tiến độ"},3000);return}
+  known.clear();store.set("pm-known",[]);resetArmed=false;e.target.textContent="Đặt lại tiến độ";drawGantt();buildDeck()};
+
+/* Quiz */
+const quiz={started:false,qs:[],i:0,score:0,miss:[]};
+function startQuiz(){
+  quiz.started=true;quiz.i=0;quiz.score=0;quiz.miss=[];
+  quiz.qs=shuffle(V).slice(0,10).map((v,n)=>{
+    const others=shuffle(V.filter(x=>x.id!==v.id)).slice(0,3);
+    let type=n%3===2?"vi2en":n%3===1?"gap":"en2vi";
+    if(type==="gap"&&!/<em>/.test(v.ex))type="en2vi";
+    const opts=shuffle([v,...others]);
+    return {v,type,opts};
+  });
+  renderQ();
+}
+function renderQ(){
+  const el=$("#quiz");
+  if(quiz.i>=quiz.qs.length){
+    el.innerHTML=`<p class="meta">Kết quả</p><p class="score">${quiz.score}/10</p>`+
+      (quiz.miss.length?`<p>Ôn lại:</p><div class="gl">${quiz.miss.map(v=>`<div><span><b>${v.en}</b><small>${v.ipa}</small></span><span>${v.vi}</span></div>`).join("")}</div>`:`<p>Không sai câu nào.</p>`)+
+      `<button class="btn primary" id="again2">Làm bài mới</button>`;
+    $("#again2").onclick=startQuiz;return;
+  }
+  const {v,type,opts}=quiz.qs[quiz.i];
+  let q,label;
+  if(type==="en2vi"){q=`<p class="q">${v.en}</p><span class="ipa">${v.ipa}</span>`;label=o=>o.vi}
+  else if(type==="vi2en"){q=`<p class="q">${v.vi}</p>`;label=o=>o.en}
+  else{q=`<p class="q">${v.ex.replace(/<em>.*?<\/em>/,'<span class="blank"></span>')}</p>`;label=o=>o.en}
+  const kind={en2vi:"Chọn nghĩa tiếng Việt",vi2en:"Chọn thuật ngữ tiếng Anh",gap:"Điền vào chỗ trống"}[type];
+  el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="phase">${kind}</span><span class="meta">Câu ${quiz.i+1}/10 · đúng ${quiz.score}</span></div>${q}
+    <div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${label(o)}</button>`).join("")}</div>
+    <div class="row"><button class="btn icon-btn" id="qs" aria-label="Nghe">🔊</button><button class="btn primary" id="qn" disabled>Câu tiếp</button></div>`;
+  let done=false;
+  el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(done)return;done=true;const pick=opts[b.dataset.k];
+    el.querySelectorAll(".opt").forEach((x,k)=>{if(opts[k].id===v.id)x.classList.add("right")});
+    if(pick.id===v.id){quiz.score++;}else{b.classList.add("wrong");quiz.miss.push(v)}
+    $("#qn").disabled=false;$("#qn").focus();
+  });
+  $("#qs").onclick=()=>speak(v.en);
+  $("#qn").onclick=()=>{quiz.i++;renderQ()};
+}
+
+/* Phrases */
+function renderPhrases(){
+  const groups=PHR.map(([g,list])=>({g,items:list.map(([en,vi])=>({en,vi}))}));
+  const my={g:MYG,items:[]};
+  mine.phrases.forEach(p=>{(groups.find(x=>x.g===p.g)||my).items.push({en:p.en,vi:p.vi||"",own:true})});
+  if(my.items.length)groups.unshift(my);
+  $("#phrases").innerHTML=groups.map(({g,items})=>`<div class="grp"><h3>${esc(g)}</h3>${items.map(({en,vi,own})=>
+    `<div class="ph"><p class="en">${esc(en)}${own?'<span class="tag">của bạn</span>':""}</p><p class="vi">${esc(vi)}</p><button class="btn icon-btn" data-say="${esc(en)}" aria-label="Nghe câu">🔊</button></div>`).join("")}</div>`).join("");
+  $("#phrases").querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>speak(b.dataset.say));
+}
+
+/* Glossary */
+function renderGloss(){
+  const t=$("#q").value.trim().toLowerCase();
+  const list=V.filter(v=>!t||v.en.toLowerCase().includes(t)||v.vi.toLowerCase().includes(t)).sort((a,b)=>a.en.localeCompare(b.en));
+  $("#glList").innerHTML=list.length?list.map(v=>`<div><span><b>${v.en}</b>${v.mine?'<span class="tag">của bạn</span>':""}<small>${v.ipa}</small></span><span>${v.vi}</span></div>`).join(""):`<p class="empty">Không tìm thấy từ nào.</p>`;
+}
+$("#q").oninput=renderGloss;
+
+applyMine();drawGantt();buildChips();buildDeck();renderGloss();renderPhrases();renderAdd();
+</script>
+
+</html>
